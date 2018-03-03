@@ -279,7 +279,7 @@ class App extends Component {
         <p>Area = {area.toFixed(2)}m<sup>2</sup></p>
         <p>Volume = {volume.toFixed(2)}m<sup>3</sup></p>
         <Header as='h3'>Itemised Prices</Header>
-        <Table celled>
+        <Table unstackable celled>
           <Table.Header>
             <Table.Row>
               <Table.HeaderCell>Item</Table.HeaderCell>
