@@ -372,7 +372,7 @@ class App extends Component {
   render() {
     return (
       <Fragment>
-        <Menu fixed='top' inverted>
+        <Menu inverted borderless>
           <Container>
             <Menu.Item header>
               <Image size='mini' src={logo} style={{ marginRight: '0.5em' }} />
@@ -380,7 +380,7 @@ class App extends Component {
             </Menu.Item>
           </Container>
         </Menu>
-        <Container style={{ marginTop: '5em' }}>
+        <Container>
           <Grid columns='equal'>
             <Grid.Column>
               {this.renderConfig()}
