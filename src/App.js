@@ -59,9 +59,8 @@ function FormForceMessage(props) {
 
   return (
     <Form.Group>
-      <Message negative>
-        <Message.Header>{props.force.title}</Message.Header>
-        {props.force.message}
+      <Message info compact size='small' style={{ padding: '0.5em 1em', marginTop: '0.25em', marginBottom: '1em' }}>
+        <b>{props.force.title}:</b> {props.force.message}
       </Message>
     </Form.Group>
   );
@@ -109,7 +108,7 @@ class App extends Component {
         meshThicknessForce = {
           value: meshThickness_SL82.value,
           title: "Forced to SL82",
-          message: <p>{meshThicknessForceMessage}</p>
+          message: <Fragment>{meshThicknessForceMessage}</Fragment>
         };
       }
 
@@ -118,14 +117,14 @@ class App extends Component {
         pumpForce = {
           value: pumpOption_Double.value,
           title: "Forced to Double",
-          message: <p>Area > 350m<sup>2</sup></p>
+          message: <Fragment>Area > 350m<sup>2</sup></Fragment>
         };
       }
       else if (area > 125) {
         pumpForce = {
           value: pumpOption_On.value,
           title: "Forced to On",
-          message: <p>Area > 350m<sup>2</sup></p>
+          message: <Fragment>Area > 350m<sup>2</sup></Fragment>
         };
       }
 
@@ -206,7 +205,7 @@ class App extends Component {
 
   renderField(name, value, label) {
     return (
-      <Form.Input name={name} type='text' value={value} label={label} onChange={this.handleInputChange} />
+      <Form.Input name={name} required type='number' value={value} label={label} onChange={this.handleInputChange} />
     );
   }
 
@@ -217,9 +216,7 @@ class App extends Component {
 
     return (
       <Fragment>
-        <Form.Group>
-          <Form.Select name={name} label={label} options={options} value={value} onChange={this.handleInputChange} />
-        </Form.Group>
+        <Form.Select name={name} label={label} options={options} value={value} fluid onChange={this.handleInputChange} />
         <FormForceMessage force={force} />
       </Fragment>
     );
