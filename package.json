@@ -10,6 +10,9 @@
     "react-scripts": "1.1.1",
     "semantic-ui-react": "^0.78.3"
   },
+  "devDependencies": {
+    "serve": "^6.5.1"
+  },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -19,8 +22,5 @@
     "serve": "serve -s build",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
-  },
-  "devDependencies": {
-    "serve": "^6.5.1"
   }
 }
