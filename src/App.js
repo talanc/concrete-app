@@ -380,7 +380,7 @@ class App extends Component {
             </Menu.Item>
           </Container>
         </Menu>
-        <Container style={{ marginTop: '4em' }}>
+        <Container style={{ marginTop: '5em' }}>
           <Grid columns='equal'>
             <Grid.Column>
               {this.renderConfig()}
