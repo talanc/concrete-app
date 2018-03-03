@@ -387,7 +387,7 @@ class App extends Component {
             </Grid.Column>
           </Grid>
           <Divider />
-          <Grid columns='equal'>
+          <Grid stackable columns='equal'>
             <Grid.Column>
               {this.renderInput()}
             </Grid.Column>
