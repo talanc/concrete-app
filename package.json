@@ -1,8 +1,10 @@
 {
   "name": "concrete-app",
   "version": "0.1.0",
+  "homepage": "https://talanc.github.io/concrete-app",
   "private": true,
   "dependencies": {
+    "gh-pages": "^1.1.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-scripts": "1.1.1",
@@ -13,7 +15,10 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "serve-build": "serve -s build"
+    "preserve": "npm run build",
+    "serve": "serve -s build",
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "devDependencies": {
     "serve": "^6.5.1"
