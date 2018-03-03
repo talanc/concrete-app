@@ -1,6 +1,9 @@
 This project was bootstrapped with [Create React App](https://github.com/facebookincubator/create-react-app).
 
-Concrete App:
+It also uses [Semantic UI](https://react.semantic-ui.com/).
+
+## Concrete App
+
 https://talanc.github.io/concrete-app
 
 ## Commands
