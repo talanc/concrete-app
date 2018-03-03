@@ -372,7 +372,7 @@ class App extends Component {
   render() {
     return (
       <Fragment>
-        <Menu inverted borderless>
+        <Menu inverted borderless style={{ borderRadius: '0' }}>
           <Container>
             <Menu.Item header>
               <Image size='mini' src={logo} style={{ marginRight: '0.5em' }} />
