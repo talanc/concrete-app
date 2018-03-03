@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import { Container, Divider, Form, Header, Grid, Message, Menu, Table } from 'semantic-ui-react';
-//import logo from './logo.svg';
+import { Container, Divider, Form, Header, Image, Grid, Message, Menu, Table } from 'semantic-ui-react';
+import logo from './logo.svg';
 import './App.css';
 
 const configuration = {
@@ -374,7 +374,10 @@ class App extends Component {
       <Fragment>
         <Menu fixed='top' inverted>
           <Container>
-            <Menu.Item header>Concrete App</Menu.Item>
+            <Menu.Item header>
+              <Image size='mini' src={logo} style={{ marginRight: '0.5em' }} />
+              Concrete App
+            </Menu.Item>
           </Container>
         </Menu>
         <Container style={{ marginTop: '4em' }}>
