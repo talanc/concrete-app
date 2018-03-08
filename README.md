@@ -4,7 +4,9 @@ It also uses [Semantic UI](https://react.semantic-ui.com/).
 
 ## Concrete App
 
-https://talanc.github.io/concrete-app
+Link: https://talanc.github.io/concrete-app
+
+Travis CI: [![Build Status](https://travis-ci.org/talanc/concrete-app.svg?branch=master)](https://travis-ci.org/talanc/concrete-app)
 
 ## Commands
 
