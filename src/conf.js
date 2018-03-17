@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Form, Header, Input, Grid, Label,Popup, Table } from 'semantic-ui-react';
 import { sqm } from './util';
+import * as util from './util';
 
 function generateKey() {
   return Math.random().toString();
@@ -40,6 +41,7 @@ export function generateDefaultConfiguration() {
     pumpOn: 950,
     pumpDouble: 1900,
     polyMembraneOn: 3.5,
+    rock: 50,
     taxRate: 10
   };
 }
@@ -257,7 +259,7 @@ export class EditConfigurationPanel extends Component {
   /**
    * @param {string} name 
    * @param {string} displayName 
-   * @param {'ea' | 'm2' | 'pct'} inputType 
+   * @param {'ea' | 'm2' | 'm3' | 'pct'} inputType 
    */
   renderExtra(name, displayName, inputType) {
     const value = this.state[name];
@@ -267,7 +269,11 @@ export class EditConfigurationPanel extends Component {
       label1 = <Label>$</Label>;
     }
     else if (inputType === 'm2') {
-      displayName = <Fragment>{displayName} (per m<sup>2</sup>)</Fragment>;
+      displayName = <Fragment>{displayName} ({util.per_m2})</Fragment>;
+      label1 = <Label>$</Label>;
+    }
+    else if (inputType === 'm3') {
+      displayName = <Fragment>{displayName} ({util.per_m3})</Fragment>;
       label1 = <Label>$</Label>;
     }
     else { // pct
@@ -309,6 +315,7 @@ export class EditConfigurationPanel extends Component {
             {this.renderExtra("polyMembraneOn", "Poly Membrane", "m2")}
             {this.renderExtra("pumpOn", "Pump", "ea")}
             {this.renderExtra("pumpDouble", "Pump (Double)", "ea")}
+            {this.renderExtra("rock", "Rock", "m3")}
             {this.renderExtra("taxRate", "Tax Rate", "pct")}
           </Table.Body>
         </Table>

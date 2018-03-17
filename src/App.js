@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Container, Divider, Form, Header, Image, Grid, Message, Menu, Table } from 'semantic-ui-react';
 import { generateDefaultConfiguration, generateDisplay , EditConfigurationPanel } from './conf';
+import * as util from './util';
 import logo from './logo.svg';
 import './App.css';
 
@@ -64,6 +65,8 @@ class App extends Component {
       pump: pumpOptions[0].value,
       pumpForce: null,
       polyMembrane: polyMembraneOptions[0].value,
+      rock: 0,
+      rockForce: null,
       editConfiguration: false
     };
 
@@ -136,9 +139,33 @@ class App extends Component {
         };
       }
 
+      let rockValue, rockArea;
+      if (area > 250) {
+        rockValue = 30;
+        rockArea = 250;
+      }
+      else if (area > 150) {
+        rockValue = 20;
+        rockArea = 150;
+      }
+      else if (area > 100) {
+        rockValue = 10;
+        rockArea = 100;
+      }
+
+      let rockForce;
+      if (rockValue) {
+        rockForce = {
+          value: rockValue,
+          title: "Forced Rock",
+          message: <Fragment>Area > {util.sqm(rockArea)}</Fragment>
+        };
+      }
+
       return {
         meshThicknessForce: meshThicknessForce,
-        pumpForce: pumpForce
+        pumpForce: pumpForce,
+        rockForce
       };
     });
   }
@@ -167,6 +194,10 @@ class App extends Component {
 
   getPump() {
     return this.state.pumpForce ? this.state.pumpForce.value : this.state.pump;
+  }
+
+  getRock() {
+    return this.state.rockForce ? this.state.rockForce : this.state.rock;
   }
 
   getArea() {
@@ -212,6 +243,11 @@ class App extends Component {
       add("Pump (Double)", configuration.pumpDouble);
     }
 
+    const rock = this.getRock();
+    if (rock > 0) {
+      add("Rock", rock * configuration.rock);
+    }
+
     const tax = total * (configuration.taxRate / 100);
     add("Tax", tax);
 
@@ -221,9 +257,16 @@ class App extends Component {
     };
   }
 
-  renderField(name, value, label) {
+  renderField(name, value, label, force) {
+    if (force) {
+      value = force.value;
+    }
+
     return (
-      <Form.Input name={name} required type='number' value={value} label={label} onChange={this.handleInputChange} />
+      <Fragment>
+        <Form.Input name={name} required type='number' value={value} label={label} onChange={this.handleInputChange} />
+        <FormForceMessage force={force} />
+      </Fragment>
     );
   }
 
@@ -263,12 +306,13 @@ class App extends Component {
       <Fragment>
         <Header as='h2'>Input</Header>
         <Form>
-          {this.renderField("width", this.state.width, 'Shed Width (m)')}
-          {this.renderField("length", this.state.length, 'Shed Length (m)')}
+          {this.renderField("width", this.state.width, 'Shed Width (m)', null)}
+          {this.renderField("length", this.state.length, 'Shed Length (m)', null)}
           {this.renderSelect("slabThickness", this.state.slabThickness, 'Slab Thickness', slabThicknessOptions, null)}
           {this.renderSelect("meshThickness", this.state.meshThickness, 'Mesh Thickness', meshThicknessOptions, this.state.meshThicknessForce)}
           {this.renderRadios("pump", this.state.pump, 'Concrete Pump', pumpOptions, this.state.pumpForce)}
           {this.renderRadios("polyMembrane", this.state.polyMembrane, 'Poly Membrane', polyMembraneOptions, null)}
+          {this.renderField("rock", this.state.rock, <label>Rock {util.per_m3}</label>, this.state.rockForce)}
         </Form>
       </Fragment>
     );
@@ -320,7 +364,10 @@ class App extends Component {
       value = calculatePrice(value);
     }
     else if (unit === 'm2') {
-      value = <p>{calculatePrice(value)} per m<sup>2</sup></p>;
+      value = <Fragment>{calculatePrice(value)} {util.per_m2}</Fragment>;
+    }
+    else if (unit === 'm3') {
+      value = <Fragment>{calculatePrice(value)} {util.per_m3}</Fragment>;
     }
 
     return (
@@ -395,6 +442,7 @@ class App extends Component {
                 {this.renderConfigExtra("Poly Membrane", configuration.polyMembraneOn, "m2", this.state.polyMembrane === polyMembrane_On.value)}
                 {this.renderConfigExtra("Pump", configuration.pumpOn, "ea", this.getPump() === pumpOption_On.value)}
                 {this.renderConfigExtra("Pump (Double)", configuration.pumpDouble, "ea", this.getPump() === pumpOption_Double.value)}
+                {this.renderConfigExtra("Rock", configuration.rock, "m3", this.getRock() > 0)}
               </Table.Body>
             </Table>
           </Grid.Column>
