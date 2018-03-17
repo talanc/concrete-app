@@ -1,24 +1,8 @@
 import React, { Component, Fragment } from 'react';
-import { Container, Divider, Form, Header, Image, Grid, Message, Menu, Table } from 'semantic-ui-react';
+import { Button, Container, Divider, Form, Header, Image, Grid, Message, Menu, Table } from 'semantic-ui-react';
+import { generateDefaultConfiguration, generateDisplay , EditConfigurationPanel } from './conf';
 import logo from './logo.svg';
 import './App.css';
-
-const configuration = {
-  concreteRates: [
-    { limit: 10, rate: 101, display: <Fragment>Less than 10m<sup>2</sup></Fragment> },
-    { limit: 20, rate: 95, display: <Fragment>10m<sup>2</sup> to 20m<sup>2</sup></Fragment> },
-    { limit: 40, rate: 90, display: <Fragment>20m<sup>2</sup> to 40m<sup>2</sup></Fragment> },
-    { limit: 60, rate: 80, display: <Fragment>40m<sup>2</sup> to 60m<sup>2</sup></Fragment> },
-    { limit: 120, rate: 70, display: <Fragment>60m<sup>2</sup> to 120m<sup>2</sup></Fragment> },
-    { limit: null, rate: 63, display: <Fragment>Over 120m<sup>2</sup></Fragment> },
-  ],
-  slabThickness125: 10,
-  meshThicknessSL82: 4.5,
-  pumpOn: 950,
-  pumpDouble: 1900,
-  polyMembraneOn: 3.5,
-  taxRate: 0.1
-};
 
 const slabThickness_100 = { key: '100', text: '100mm', value: 100 };
 const slabThickness_125 = { key: '125', text: '125mm', value: 125 };
@@ -71,6 +55,7 @@ class App extends Component {
     super(props);
 
     this.state = {
+      configuration: generateDefaultConfiguration(),
       width: 6,
       length: 9,
       slabThickness: slabThicknessOptions[0].value,
@@ -78,10 +63,33 @@ class App extends Component {
       meshThicknessForce: null,
       pump: pumpOptions[0].value,
       pumpForce: null,
-      polyMembrane: polyMembraneOptions[0].value
+      polyMembrane: polyMembraneOptions[0].value,
+      editConfiguration: false
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleConfigurationSave = this.handleConfigurationSave.bind(this);
+    this.handleConfigurationShow = this.handleConfigurationShow.bind(this);
+    this.handleConfigurationCancel = this.handleConfigurationCancel.bind(this);
+  }
+
+  handleConfigurationShow() {
+    this.setState({
+      editConfiguration: true
+    });
+  }
+
+  handleConfigurationSave(configuration) {
+    this.setState({
+      editConfiguration: false,
+      configuration
+    });
+  }
+
+  handleConfigurationCancel() {
+    this.setState({
+      editConfiguration: false
+    });
   }
 
   handleInputChange(event, { name, value }) {
@@ -135,8 +143,13 @@ class App extends Component {
     });
   }
 
+  getConfiguration() {
+    return this.state.configuration;
+  }
+
   getCurrentRate() {
     const area = this.getArea();
+    const configuration = this.getConfiguration();
 
     let rate = configuration.concreteRates.find(rate => {
       return area < rate.limit
@@ -160,8 +173,11 @@ class App extends Component {
     return calculateArea(this.state.width, this.state.length);
   }
 
-  getTotal() {
+  getVolume() {
+    return this.getArea() * (this.state.slabThickness / 1000);
+  }
 
+  getTotal() {
     let items = [];
     let total = 0;
     function add(item, cost) {
@@ -170,6 +186,8 @@ class App extends Component {
     }
 
     const area = this.getArea();
+
+    const configuration = this.getConfiguration();
 
     const rate = this.getCurrentRate();
     add("Base Slab", area * rate.rate);
@@ -194,7 +212,7 @@ class App extends Component {
       add("Pump (Double)", configuration.pumpDouble);
     }
 
-    const tax = total * configuration.taxRate;
+    const tax = total * (configuration.taxRate / 100);
     add("Tax", tax);
 
     return {
@@ -257,8 +275,8 @@ class App extends Component {
   }
 
   renderOutput() {
-    const area = this.state.width * this.state.length;
-    const volume = area * (this.state.slabThickness / 1000);
+    const area = this.getArea();
+    const volume = this.getVolume();
     const total = this.getTotal();
 
     const items = total.items.map(item => {
@@ -313,16 +331,28 @@ class App extends Component {
     );
   }
 
-  renderConfig() {
-    const conf = configuration;
+  renderEditConfig() {
+    return (
+      <EditConfigurationPanel
+        configuration={this.state.configuration}
+        onSave={this.handleConfigurationSave}
+        onCancel={this.handleConfigurationCancel}
+      />
+    );
+  }
 
+  renderShowConfig() {
+    const configuration = this.getConfiguration();
     const activeRate = this.getCurrentRate();
+    const displays = generateDisplay(configuration.concreteRates);
 
-    const rates = conf.concreteRates.map(rate => {
+    const rates = configuration.concreteRates.map((rate, i) => {
+      const display = displays[i];
       const active = (rate === activeRate);
+
       return (
-        <Table.Row key={rate.rate} active={active}>
-          <Table.Cell>{rate.display}</Table.Cell>
+        <Table.Row key={rate.key} active={active}>
+          <Table.Cell>{display}</Table.Cell>
           <Table.Cell>{calculatePrice(rate.rate)}</Table.Cell>
         </Table.Row>
       );
@@ -330,7 +360,11 @@ class App extends Component {
 
     return (
       <Fragment>
-        <Header as='h2'>Configuration</Header>
+        <Form>
+          <Form.Group>
+            <Button onClick={this.handleConfigurationShow}>Edit Configuration</Button>
+          </Form.Group>
+        </Form>
         <Grid columns='equal'>
           <Grid.Column>
             <Header as='h4'>Concrete Rates</Header>
@@ -356,15 +390,26 @@ class App extends Component {
                 </Table.Row>
               </Table.Header>
               <Table.Body>
-                {this.renderConfigExtra("Slab Thickness 125mm", conf.slabThickness125, "m2", this.state.slabThickness === slabThickness_125.value)}
-                {this.renderConfigExtra("Mesh Thickness SL82", conf.meshThicknessSL82, "m2", this.getMeshThickness() === meshThickness_SL82.value)}
-                {this.renderConfigExtra("Poly Membrane", conf.polyMembraneOn, "m2", this.state.polyMembrane === polyMembrane_On.value)}
-                {this.renderConfigExtra("Pump", conf.pumpOn, "ea", this.getPump() === pumpOption_On.value)}
-                {this.renderConfigExtra("Pump (Double)", conf.pumpDouble, "ea", this.getPump() === pumpOption_Double.value)}
+                {this.renderConfigExtra("Slab Thickness 125mm", configuration.slabThickness125, "m2", this.state.slabThickness === slabThickness_125.value)}
+                {this.renderConfigExtra("Mesh Thickness SL82", configuration.meshThicknessSL82, "m2", this.getMeshThickness() === meshThickness_SL82.value)}
+                {this.renderConfigExtra("Poly Membrane", configuration.polyMembraneOn, "m2", this.state.polyMembrane === polyMembrane_On.value)}
+                {this.renderConfigExtra("Pump", configuration.pumpOn, "ea", this.getPump() === pumpOption_On.value)}
+                {this.renderConfigExtra("Pump (Double)", configuration.pumpDouble, "ea", this.getPump() === pumpOption_Double.value)}
               </Table.Body>
             </Table>
           </Grid.Column>
         </Grid>
+      </Fragment>
+    );
+  }
+
+  renderConfig() {
+    const panel = (this.state.editConfiguration ? this.renderEditConfig() : this.renderShowConfig());
+
+    return (
+      <Fragment>
+        <Header as='h2'>Configuration</Header>
+        {panel}
       </Fragment>
     );
   }
@@ -381,18 +426,18 @@ class App extends Component {
           </Container>
         </Menu>
         <Container>
-          <Grid columns='equal'>
-            <Grid.Column>
-              {this.renderConfig()}
-            </Grid.Column>
-          </Grid>
-          <Divider />
           <Grid stackable columns='equal'>
             <Grid.Column>
               {this.renderInput()}
             </Grid.Column>
             <Grid.Column>
               {this.renderOutput()}
+            </Grid.Column>
+          </Grid>
+          <Divider />
+          <Grid columns='equal'>
+            <Grid.Column>
+              {this.renderConfig()}
             </Grid.Column>
           </Grid>
         </Container>
