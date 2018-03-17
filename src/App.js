@@ -1,9 +1,11 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Container, Divider, Form, Header, Image, Grid, Message, Menu, Table } from 'semantic-ui-react';
-import { generateDefaultConfiguration, generateDisplay , EditConfigurationPanel } from './conf';
+import { generateDefaultConfiguration, generateDisplay, EditConfigurationPanel } from './conf';
 import * as util from './util';
 import logo from './logo.svg';
 import './App.css';
+
+const storageItemName_AppState = "appState";
 
 const slabThickness_100 = { key: '100', text: '100mm', value: 100 };
 const slabThickness_125 = { key: '125', text: '125mm', value: 125 };
@@ -28,6 +30,23 @@ const polyMembrane_Off = { key: 'off', text: "Off", value: 'off' };
 const polyMembrane_On = { key: 'on', text: "On", value: 'on' };
 
 const polyMembraneOptions = [polyMembrane_Off, polyMembrane_On];
+
+function getDefaultAppState() {
+  return {
+    configuration: generateDefaultConfiguration(),
+    width: 6,
+    length: 9,
+    slabThickness: slabThicknessOptions[0].value,
+    meshThickness: meshThicknessOptions[0].value,
+    meshThicknessForce: null,
+    pump: pumpOptions[0].value,
+    pumpForce: null,
+    polyMembrane: polyMembraneOptions[0].value,
+    rock: 0,
+    rockForce: null,
+    editConfiguration: false
+  }
+}
 
 function calculateArea(width, length) {
   return width * length;
@@ -55,25 +74,111 @@ class App extends Component {
   constructor(props) {
     super(props);
 
+    // load from local storage
+    try {
+      const appState = localStorage.getItem(storageItemName_AppState);
+      if (appState !== null) {
+        this.state = JSON.parse(appState);
+      }
+    }
+    catch (error) {
+      console.log('could not load app state');
+      console.error(error);
+    }
+
+    // load default if we couldnt load it
+    if (this.state === undefined) {
+      this.state = getDefaultAppState();
+    }
+
+    // update forces
     this.state = {
-      configuration: generateDefaultConfiguration(),
-      width: 6,
-      length: 9,
-      slabThickness: slabThicknessOptions[0].value,
-      meshThickness: meshThicknessOptions[0].value,
-      meshThicknessForce: null,
-      pump: pumpOptions[0].value,
-      pumpForce: null,
-      polyMembrane: polyMembraneOptions[0].value,
-      rock: 0,
-      rockForce: null,
-      editConfiguration: false
+      ...this.state,
+      ...this.getStateForces(this.state)
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
     this.handleConfigurationSave = this.handleConfigurationSave.bind(this);
     this.handleConfigurationShow = this.handleConfigurationShow.bind(this);
     this.handleConfigurationCancel = this.handleConfigurationCancel.bind(this);
+  }
+
+  saveState() {
+    this.setState((prevState, props) => {
+      const appState = JSON.stringify(prevState);
+      localStorage.setItem(storageItemName_AppState, appState);
+
+      return {};
+    });
+  }
+
+  getStateForces(prevState) {
+    const area = calculateArea(prevState.width, prevState.length);
+
+    let meshThicknessForceMessage;
+    if (prevState.width > 12 && prevState.length) {
+      meshThicknessForceMessage = "Width > 12m, Length > 12m";
+    }
+    else if (prevState.width > 12) {
+      meshThicknessForceMessage = "Width > 12m";
+    }
+    else if (prevState.length > 12) {
+      meshThicknessForceMessage = "Length > 12m";
+    }
+
+    let meshThicknessForce;
+    if (meshThicknessForceMessage) {
+      meshThicknessForce = {
+        value: meshThickness_SL82.value,
+        title: "Forced to SL82",
+        message: <Fragment>{meshThicknessForceMessage}</Fragment>
+      };
+    }
+
+    let pumpForce = null;
+    if (area > 350) {
+      pumpForce = {
+        value: pumpOption_Double.value,
+        title: "Forced to Double",
+        message: <Fragment>Area > 350m<sup>2</sup></Fragment>
+      };
+    }
+    else if (area > 125) {
+      pumpForce = {
+        value: pumpOption_On.value,
+        title: "Forced to On",
+        message: <Fragment>Area > 350m<sup>2</sup></Fragment>
+      };
+    }
+
+    let rockValue, rockArea;
+    if (area > 250) {
+      rockValue = 30;
+      rockArea = 250;
+    }
+    else if (area > 150) {
+      rockValue = 20;
+      rockArea = 150;
+    }
+    else if (area > 100) {
+      rockValue = 10;
+      rockArea = 100;
+    }
+
+    let rockForce;
+    if (rockValue) {
+      rockForce = {
+        value: rockValue,
+        title: "Forced Rock",
+        message: <Fragment>Area > {util.sqm(rockArea)}</Fragment>
+      };
+    }
+
+    return {
+      meshThicknessForce: meshThicknessForce,
+      pumpForce: pumpForce,
+      rockForce
+    };
   }
 
   handleConfigurationShow() {
@@ -87,6 +192,8 @@ class App extends Component {
       editConfiguration: false,
       configuration
     });
+
+    this.saveState();
   }
 
   handleConfigurationCancel() {
@@ -100,74 +207,10 @@ class App extends Component {
       [name]: value
     });
 
-    this.setState((prevState, props) => {
-      const area = calculateArea(prevState.width, prevState.length);
-
-      let meshThicknessForceMessage;
-      if (prevState.width > 12 && prevState.length) {
-        meshThicknessForceMessage = "Width > 12m, Length > 12m";
-      }
-      else if (prevState.width > 12) {
-        meshThicknessForceMessage = "Width > 12m";
-      }
-      else if (prevState.length > 12) {
-        meshThicknessForceMessage = "Length > 12m";
-      }
-
-      let meshThicknessForce;
-      if (meshThicknessForceMessage) {
-        meshThicknessForce = {
-          value: meshThickness_SL82.value,
-          title: "Forced to SL82",
-          message: <Fragment>{meshThicknessForceMessage}</Fragment>
-        };
-      }
-
-      let pumpForce = null;
-      if (area > 350) {
-        pumpForce = {
-          value: pumpOption_Double.value,
-          title: "Forced to Double",
-          message: <Fragment>Area > 350m<sup>2</sup></Fragment>
-        };
-      }
-      else if (area > 125) {
-        pumpForce = {
-          value: pumpOption_On.value,
-          title: "Forced to On",
-          message: <Fragment>Area > 350m<sup>2</sup></Fragment>
-        };
-      }
-
-      let rockValue, rockArea;
-      if (area > 250) {
-        rockValue = 30;
-        rockArea = 250;
-      }
-      else if (area > 150) {
-        rockValue = 20;
-        rockArea = 150;
-      }
-      else if (area > 100) {
-        rockValue = 10;
-        rockArea = 100;
-      }
-
-      let rockForce;
-      if (rockValue) {
-        rockForce = {
-          value: rockValue,
-          title: "Forced Rock",
-          message: <Fragment>Area > {util.sqm(rockArea)}</Fragment>
-        };
-      }
-
-      return {
-        meshThicknessForce: meshThicknessForce,
-        pumpForce: pumpForce,
-        rockForce
-      };
-    });
+    this.setState(prevState => {
+      const forces = this.getStateForces(prevState);
+      return forces;
+    })
   }
 
   getConfiguration() {
