@@ -356,6 +356,8 @@ export class EditConfigurationPanel extends Component {
   }
 
   render() {
+    const configuration = this.getConfiguration();
+
     return (
       <Fragment>
         <Grid columns="2">
@@ -367,14 +369,8 @@ export class EditConfigurationPanel extends Component {
           </Grid.Column>
         </Grid>
         <Form>
-          <Form.Input label='Configuration Name' type='text' placeholder='Configuration Name' />
+          <Form.Input name='name' label='Configuration Name' type='text' placeholder='Configuration Name' value={configuration.name} onChange={this.handleNameChange} />
           <util.PasswordField label='Password (for editing configuration settings)' onChange={this.handleSecretChange} />
-        </Form>
-        <Form>
-          <Form.Group>
-            <Button positive onClick={this.handleSave}>Save</Button>
-            <Button onClick={this.handleCancel}>Cancel</Button>
-          </Form.Group>
         </Form>
       </Fragment>
     );
@@ -393,6 +389,9 @@ export class ConfigurationEditorModal extends Component {
     this.open = this.open.bind(this);
     this.close = this.close.bind(this);
     this.handleConfigurationChange = this.handleConfigurationChange.bind(this);
+
+    this.createConfiguration = this.createConfiguration.bind(this);
+    this.saveConfiguration = this.saveConfiguration.bind(this);
   }
 
   getDefaultState() {
@@ -422,14 +421,20 @@ export class ConfigurationEditorModal extends Component {
     this.setState({ configuration });
   }
 
+  createConfiguration() {
+  }
+
+  saveConfiguration() {
+  }
+
   render() {
     const modeText = (this.isEditMode ? "Edit Configuration" : "New Configuration");
 
     const trigger = <Form><Form.Group><Button>{modeText}</Button></Form.Group></Form>;
 
     const primary = (this.isEditMode
-      ? <Button primary onClick={this.handleEdit}>Save Changes</Button>
-      : <Button primary onClick={this.handleCreate}>Create</Button>
+      ? <Button primary onClick={this.saveConfiguration}>Save Changes</Button>
+      : <Button primary onClick={this.createConfiguration}>Create</Button>
     );
 
     return (
@@ -542,7 +547,7 @@ export class LoadConfigurationModal extends Component {
     }
 
     return (
-      <p>Configuration Loaded: <b>{this.state.configuration.name}</b></p>
+      <p>Configuration Found: <b>{this.state.configuration.name}</b></p>
     );
   }
 
