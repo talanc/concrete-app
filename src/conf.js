@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
-import { Button, Form, Header, Input, Grid, Label,Popup, Table } from 'semantic-ui-react';
+import { Button, Form, Header, Input, Grid, Label, Modal, Popup, Table } from 'semantic-ui-react';
 import { sqm } from './util';
+import * as storage from './storage';
 import * as util from './util';
 
 function generateKey() {
@@ -28,6 +29,9 @@ export function generateDisplay(rates) {
 
 export function generateDefaultConfiguration() {
   return {
+    id: null,
+    isDefault: true,
+    name: "Default",
     concreteRates: [
       { key: generateKey(), limit: 10, rate: 101 },
       { key: generateKey(), limit: 20, rate: 95 },
@@ -106,24 +110,64 @@ export class EditConfigurationPanel extends Component {
   constructor(props) {
     super(props);
 
-    this.state = props.configuration;
+    this.state = {
+      configuration: props.configuration,
+      secret: null
+    };
 
-    this.handleSave = this.handleSave.bind(this);
-    this.handleCancel = this.handleCancel.bind(this);
+    this.handleSecretChange = this.handleSecretChange.bind(this);
+    this.handleNameChange = this.handleNameChange.bind(this);
     this.handleExtraChange = this.handleExtraChange.bind(this);
   }
 
-  handleSave() {
-    this.props.onSave(this.state);
+  getConfiguration() {
+    return this.state.configuration;
   }
 
-  handleCancel() {
-    this.props.onCancel();
+  updateConfiguration(newObj) {
+    const configuration = {
+      ...this.getConfiguration(),
+      ...newObj
+    };
+
+    this.setState({ configuration: configuration });
+
+    this.props.onConfigurationChanged(configuration);
+  }
+
+  handleSecretChange(secret) {
+    this.setState({
+      secret: secret
+    });
+  }
+
+  setConcreteRates(concreteRates) {
+    this.updateConfiguration({
+      concreteRates: concreteRates
+    });
+  }
+
+  handleNameChange(event, { name, value }) {
+    this.updateConfiguration({
+      [name]: value
+    });
+  }
+
+  handleExtraChange(event, { name, value }) {
+    value = parseFloat(value);
+    if (isNaN(value)) {
+      value = 0;
+    }
+
+    this.updateConfiguration({
+      [name]: value
+    });
   }
 
   handleAddRow(i) {
-    const thisRow = this.state.concreteRates[i];
-    const prevRow = this.state.concreteRates[i - 1];
+    const configuration = this.getConfiguration();
+    const thisRow = configuration.concreteRates[i];
+    const prevRow = configuration.concreteRates[i - 1];
 
     const key = generateKey();
 
@@ -155,25 +199,23 @@ export class EditConfigurationPanel extends Component {
 
     const item = { key, limit, rate };
 
-    const concreteRates = this.state.concreteRates.slice();
+    const concreteRates = configuration.concreteRates.slice();
     concreteRates.splice(i, 0, item);
 
-    this.setState({
-      concreteRates
-    });
+    this.setConcreteRates(concreteRates);
   }
 
   handleRemoveRow(i) {
-    const concreteRates = this.state.concreteRates.slice();
+    const configuration = this.getConfiguration();
+    const concreteRates = configuration.concreteRates.slice();
     concreteRates.splice(i, 1);
 
-    this.setState({
-      concreteRates
-    });
+    this.setConcreteRates(concreteRates);
   }
 
   handleLimitChange(i, limit) {
-    const concreteRates = this.state.concreteRates.slice();
+    const configuration = this.getConfiguration();
+    const concreteRates = configuration.concreteRates.slice();
 
     var item = {
       ...concreteRates[i],
@@ -189,13 +231,12 @@ export class EditConfigurationPanel extends Component {
 
     concreteRates.splice(newIdx, 0, item);
 
-    this.setState({
-      concreteRates
-    });
+    this.setConcreteRates(concreteRates);
   }
 
   handleRateChange(i, rate) {
-    const concreteRates = this.state.concreteRates.slice();
+    const configuration = this.getConfiguration();
+    const concreteRates = configuration.concreteRates.slice();
 
     var item = {
       ...concreteRates[i],
@@ -204,28 +245,17 @@ export class EditConfigurationPanel extends Component {
 
     concreteRates.splice(i, 1, item);
 
-    this.setState({
-      concreteRates
-    });
-  }
-
-  handleExtraChange(event, { name, value }) {
-    value = parseFloat(value);
-    if (isNaN(value)) {
-      value = 0;
-    }
-
-    this.setState({
-      [name]: value
-    });
+    this.setConcreteRates(concreteRates);
   }
 
   renderRow(i) {
+    const configuration = this.getConfiguration();
+
     return (
       <ConcreteRateRow
-        key={this.state.concreteRates[i].key}
-        limit={this.state.concreteRates[i].limit}
-        rate={this.state.concreteRates[i].rate}
+        key={configuration.concreteRates[i].key}
+        limit={configuration.concreteRates[i].limit}
+        rate={configuration.concreteRates[i].rate}
         onAdd={() => this.handleAddRow(i)}
         onRemove={() => this.handleRemoveRow(i)}
         onLimitChange={(newLimit) => this.handleLimitChange(i, newLimit)}
@@ -235,7 +265,8 @@ export class EditConfigurationPanel extends Component {
   }
 
   renderConcreteRates() {
-    const rows = this.state.concreteRates.map((value, i) => this.renderRow(i));
+    const configuration = this.getConfiguration();
+    const rows = configuration.concreteRates.map((value, i) => this.renderRow(i));
 
     return (
       <Fragment>
@@ -262,7 +293,8 @@ export class EditConfigurationPanel extends Component {
    * @param {'ea' | 'm2' | 'm3' | 'pct'} inputType 
    */
   renderExtra(name, displayName, inputType) {
-    const value = this.state[name];
+    const configuration = this.getConfiguration();
+    const value = configuration[name];
 
     let label1, label2;
     if (inputType === 'ea') {
@@ -335,12 +367,209 @@ export class EditConfigurationPanel extends Component {
           </Grid.Column>
         </Grid>
         <Form>
+          <Form.Input label='Configuration Name' type='text' placeholder='Configuration Name' />
+          <util.PasswordField label='Password (for editing configuration settings)' onChange={this.handleSecretChange} />
+        </Form>
+        <Form>
           <Form.Group>
             <Button positive onClick={this.handleSave}>Save</Button>
             <Button onClick={this.handleCancel}>Cancel</Button>
           </Form.Group>
         </Form>
       </Fragment>
+    );
+  }
+}
+
+export class ConfigurationEditorModal extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = this.getDefaultState();
+
+    this.isEditMode = (props.mode === 'edit');
+    this.isCreateMode = (props.mode === 'create');
+
+    this.open = this.open.bind(this);
+    this.close = this.close.bind(this);
+    this.handleConfigurationChange = this.handleConfigurationChange.bind(this);
+  }
+
+  getDefaultState() {
+    return {
+      open: false,
+      configuration: this.props.configuration,
+      secret: this.props.secret
+    };
+  }
+
+  open() {
+    const defaultState = this.getDefaultState();
+
+    this.setState({
+      ...defaultState,
+      open: true
+    });
+  }
+
+  close() {
+    this.setState({
+      open: false
+    });
+  }
+
+  handleConfigurationChange(configuration) {
+    this.setState({ configuration });
+  }
+
+  render() {
+    const modeText = (this.isEditMode ? "Edit Configuration" : "New Configuration");
+
+    const trigger = <Form><Form.Group><Button>{modeText}</Button></Form.Group></Form>;
+
+    const primary = (this.isEditMode
+      ? <Button primary onClick={this.handleEdit}>Save Changes</Button>
+      : <Button primary onClick={this.handleCreate}>Create</Button>
+    );
+
+    return (
+      <Modal open={this.state.open} onOpen={this.open} onClose={this.close} trigger={trigger} size='fullscreen'>
+        <Modal.Header>{modeText}</Modal.Header>
+        <Modal.Content>
+          <EditConfigurationPanel configuration={this.state.configuration} onConfigurationChanged={this.handleConfigurationChange} />
+        </Modal.Content>
+        <Modal.Actions>
+          {primary}
+          <Button onClick={this.close}>Cancel</Button>
+        </Modal.Actions>
+      </Modal>
+    );
+  }
+}
+
+export class LoadConfigurationModal extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = this.getDefaultState();
+
+    this.open = this.open.bind(this);
+    this.close = this.close.bind(this);
+
+    this.handleChange = this.handleChange.bind(this);
+    this.handleSearch = this.handleSearch.bind(this);
+    this.handleSubmit = this.handleSubmit.bind(this);
+  }
+
+  getDefaultState() {
+    return {
+      open: false,
+      id: null,
+      configuration: null,
+      searching: false,
+      error: null
+    };
+  }
+
+  open() {
+    const defaultState = this.getDefaultState();
+
+    this.setState({
+      ...defaultState,
+      open: true
+    });
+  }
+
+  close() {
+    this.setState({
+      open: false
+    });
+  }
+
+  handleChange(event, { name, value }) {
+    this.setState({
+      [name]: value
+    });
+  }
+
+  handleSearch() {
+    this.setState({
+      searching: true,
+      configuration: null
+    });
+
+    const configuration = storage.getConfiguration(this.state.id);
+    if (configuration === null) {
+      this.setState({
+        error: `could not find ${this.state.id}`
+      });
+    }
+
+    this.setState({
+      searching: false,
+      configuration
+    });
+  }
+
+  handleSubmit() {
+    this.props.onConfigurationSelected(this.state.configuration);
+    this.close();
+  }
+
+  renderSearching() {
+    if (!this.state.searching) {
+      return null;
+    }
+
+    return (
+      <p>Searching...</p>
+    );
+  }
+
+  renderError() {
+    if (this.state.error === null) {
+      return null;
+    }
+
+    return (
+      <p>Error: <b>{this.state.error}</b></p>
+    );
+  }
+
+  renderLoaded() {
+    if (this.state.configuration === null) {
+      return null;
+    }
+
+    return (
+      <p>Configuration Loaded: <b>{this.state.configuration.name}</b></p>
+    );
+  }
+
+  render() {
+    const trigger = <Form><Form.Group><Button>Load Configuration</Button></Form.Group></Form>;
+    const disabledLoad = this.state.configuration === null;
+
+    return (
+      <Modal open={this.state.open} onOpen={this.open} onClose={this.close} trigger={trigger}>
+        <Modal.Header>Load Configuration</Modal.Header>
+        <Modal.Content>
+          <Form>
+            <Form.Field>
+              <label>Configuration ID</label>
+              <Input name="id" type='text' placeholder='Enter Configuration ID' onChange={this.handleChange} />
+            </Form.Field>
+            <Button onClick={this.handleSearch}>Search</Button>
+            {this.renderSearching()}
+            {this.renderError()}
+            {this.renderLoaded()}
+          </Form>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button primary onClick={this.handleSubmit} disabled={disabledLoad}>Load</Button>
+          <Button onClick={this.close}>Cancel</Button>
+        </Modal.Actions>
+      </Modal>
     );
   }
 }

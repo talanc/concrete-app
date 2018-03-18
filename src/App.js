@@ -1,6 +1,7 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Container, Divider, Form, Header, Image, Grid, Message, Menu, Table } from 'semantic-ui-react';
-import { generateDefaultConfiguration, generateDisplay, EditConfigurationPanel } from './conf';
+import { generateDefaultConfiguration, generateDisplay, EditConfigurationPanel, LoadConfigurationModal } from './conf';
+import * as conf from './conf';
 import * as util from './util';
 import logo from './logo.svg';
 import './App.css';
@@ -98,6 +99,9 @@ class App extends Component {
     };
 
     this.handleInputChange = this.handleInputChange.bind(this);
+
+    this.handleConfigurationLoaded = this.handleConfigurationLoaded.bind(this);
+
     this.handleConfigurationSave = this.handleConfigurationSave.bind(this);
     this.handleConfigurationShow = this.handleConfigurationShow.bind(this);
     this.handleConfigurationCancel = this.handleConfigurationCancel.bind(this);
@@ -184,6 +188,12 @@ class App extends Component {
   handleConfigurationShow() {
     this.setState({
       editConfiguration: true
+    });
+  }
+
+  handleConfigurationLoaded(configuration) {
+    this.setState({
+      configuration
     });
   }
 
@@ -495,11 +505,36 @@ class App extends Component {
   }
 
   renderConfig() {
+    const configuration = this.getConfiguration();
+
+    const newConf = (configuration.isDefault
+      ? <Button>New Configuration</Button>
+      : null
+    );
+
+    const loadConf = <Button>Load Configuration</Button>;
+
+    const editConf = (!configuration.isDefault
+      ? <Button>Edit Configuration</Button>
+      : null
+    );
+
+    const shareConf = (configuration.id !== null
+      ? <Button>Share Configuration</Button>
+      : null
+    );
+
     const panel = (this.state.editConfiguration ? this.renderEditConfig() : this.renderShowConfig());
 
     return (
       <Fragment>
-        <Header as='h2'>Configuration</Header>
+        <Header as='h2'>Configuration: {configuration.name}</Header>
+        <Form><Form.Group>
+          {newConf}
+          {loadConf}
+          {editConf}
+          {shareConf}
+        </Form.Group></Form>
         {panel}
       </Fragment>
     );
@@ -529,6 +564,8 @@ class App extends Component {
           <Grid columns='equal'>
             <Grid.Column>
               {this.renderConfig()}
+              <LoadConfigurationModal onConfigurationSelected={this.handleConfigurationLoaded} />
+              <conf.ConfigurationEditorModal configuration={this.getConfiguration()} />
             </Grid.Column>
           </Grid>
         </Container>
