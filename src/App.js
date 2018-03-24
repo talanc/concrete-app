@@ -1,20 +1,16 @@
 import React, { Component, Fragment } from 'react';
-import { Button, Container, Divider, Form, Header, Image, Grid, Message, Menu, Table } from 'semantic-ui-react';
-import { generateDefaultConfiguration, generateDisplay, EditConfigurationPanel, LoadConfigurationModal } from './conf';
+import { Container, Divider, Form, Header, Image, Grid, Message, Menu, Table } from 'semantic-ui-react';
+import { generateDefaultConfiguration, generateDisplay } from './conf';
 import * as conf from './conf';
+import * as storage from './storage';
 import * as util from './util';
 import logo from './logo.svg';
 import './App.css';
 
-const storageItemName_AppState = "appState";
-
 const slabThickness_100 = { key: '100', text: '100mm', value: 100 };
 const slabThickness_125 = { key: '125', text: '125mm', value: 125 };
 
-const slabThicknessOptions = [
-  slabThickness_100,
-  slabThickness_125
-];
+const slabThicknessOptions = [ slabThickness_100, slabThickness_125 ];
 
 const meshThickness_SL72 = { key: 'SL72', text: 'SL72', value: 'SL72' };
 const meshThickness_SL82 = { key: 'SL82', text: 'SL82', value: 'SL82' };
@@ -75,45 +71,47 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    // load from local storage
-    try {
-      const appState = localStorage.getItem(storageItemName_AppState);
-      if (appState !== null) {
-        this.state = JSON.parse(appState);
-      }
-    }
-    catch (error) {
-      console.log('could not load app state');
-      console.error(error);
-    }
+    //console.log(props);
 
-    // load default if we couldnt load it
-    if (this.state === undefined) {
-      this.state = getDefaultAppState();
-    }
+    // load initial state
+    this.state = getDefaultAppState();
+
+    // load configuration
+    /*const configurationId = storage.getCacheConfigurationId();
+    if (configurationId !== null) {
+      this.state.configuration = storage.getConfiguration(configurationId);
+    }*/
 
     // update forces
     this.state = {
       ...this.state,
       ...this.getStateForces(this.state)
     };
-
-    this.handleInputChange = this.handleInputChange.bind(this);
-
-    this.handleConfigurationLoaded = this.handleConfigurationLoaded.bind(this);
-
-    this.handleConfigurationSave = this.handleConfigurationSave.bind(this);
-    this.handleConfigurationShow = this.handleConfigurationShow.bind(this);
-    this.handleConfigurationCancel = this.handleConfigurationCancel.bind(this);
   }
 
-  saveState() {
-    this.setState((prevState, props) => {
-      const appState = JSON.stringify(prevState);
-      localStorage.setItem(storageItemName_AppState, appState);
+  handleConfigurationChange = (configuration) => {
+    configuration = {
+      ...configuration,
+      isDefault: false
+    };
 
-      return {};
+    console.log(storage.encodeConfiguration(configuration));
+    console.log(storage.encodeConfiguration(configuration).length);
+
+    this.setState({
+      configuration
     });
+  }
+
+  handleInputChange = (event, { name, value }) => {
+    this.setState({
+      [name]: value
+    });
+
+    this.setState(prevState => {
+      const forces = this.getStateForces(prevState);
+      return forces;
+    })
   }
 
   getStateForces(prevState) {
@@ -183,44 +181,6 @@ class App extends Component {
       pumpForce: pumpForce,
       rockForce
     };
-  }
-
-  handleConfigurationShow() {
-    this.setState({
-      editConfiguration: true
-    });
-  }
-
-  handleConfigurationLoaded(configuration) {
-    this.setState({
-      configuration
-    });
-  }
-
-  handleConfigurationSave(configuration) {
-    this.setState({
-      editConfiguration: false,
-      configuration
-    });
-
-    this.saveState();
-  }
-
-  handleConfigurationCancel() {
-    this.setState({
-      editConfiguration: false
-    });
-  }
-
-  handleInputChange(event, { name, value }) {
-    this.setState({
-      [name]: value
-    });
-
-    this.setState(prevState => {
-      const forces = this.getStateForces(prevState);
-      return forces;
-    })
   }
 
   getConfiguration() {
@@ -431,17 +391,7 @@ class App extends Component {
     );
   }
 
-  renderEditConfig() {
-    return (
-      <EditConfigurationPanel
-        configuration={this.state.configuration}
-        onSave={this.handleConfigurationSave}
-        onCancel={this.handleConfigurationCancel}
-      />
-    );
-  }
-
-  renderShowConfig() {
+  renderConfigInfo() {
     const configuration = this.getConfiguration();
     const activeRate = this.getCurrentRate();
     const displays = generateDisplay(configuration.concreteRates);
@@ -460,11 +410,6 @@ class App extends Component {
 
     return (
       <Fragment>
-        <Form>
-          <Form.Group>
-            <Button onClick={this.handleConfigurationShow}>Edit Configuration</Button>
-          </Form.Group>
-        </Form>
         <Grid columns='equal'>
           <Grid.Column>
             <Header as='h4'>Concrete Rates</Header>
@@ -507,35 +452,17 @@ class App extends Component {
   renderConfig() {
     const configuration = this.getConfiguration();
 
-    const newConf = (configuration.isDefault
-      ? <Button>New Configuration</Button>
-      : null
-    );
-
-    const loadConf = <Button>Load Configuration</Button>;
-
-    const editConf = (!configuration.isDefault
-      ? <Button>Edit Configuration</Button>
-      : null
-    );
-
-    const shareConf = (configuration.id !== null
-      ? <Button>Share Configuration</Button>
-      : null
-    );
-
-    const panel = (this.state.editConfiguration ? this.renderEditConfig() : this.renderShowConfig());
-
     return (
       <Fragment>
         <Header as='h2'>Configuration: {configuration.name}</Header>
-        <Form><Form.Group>
-          {newConf}
-          {loadConf}
-          {editConf}
-          {shareConf}
-        </Form.Group></Form>
-        {panel}
+        <Form>
+          <Form.Group>
+            <conf.ConfigurationEditorModal mode='create' configuration={configuration} onSubmit={this.handleConfigurationChange} />
+            <conf.LoadConfigurationModal decode={storage.decodeConfiguration} onSubmit={this.handleConfigurationChange} />
+            <conf.ShareConfigurationModal shareUrl={storage.getShareConfigurationUrl(configuration)} disabled={configuration.isDefault} />
+          </Form.Group>
+        </Form>
+        {this.renderConfigInfo()}
       </Fragment>
     );
   }
@@ -564,8 +491,6 @@ class App extends Component {
           <Grid columns='equal'>
             <Grid.Column>
               {this.renderConfig()}
-              <LoadConfigurationModal onConfigurationSelected={this.handleConfigurationLoaded} />
-              <conf.ConfigurationEditorModal configuration={this.getConfiguration()} />
             </Grid.Column>
           </Grid>
         </Container>

@@ -1,7 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Form, Header, Input, Grid, Label, Modal, Popup, Table } from 'semantic-ui-react';
 import { sqm } from './util';
-import * as storage from './storage';
 import * as util from './util';
 
 function generateKey() {
@@ -370,7 +369,6 @@ export class EditConfigurationPanel extends Component {
         </Grid>
         <Form>
           <Form.Input name='name' label='Configuration Name' type='text' placeholder='Configuration Name' value={configuration.name} onChange={this.handleNameChange} />
-          <util.PasswordField label='Password (for editing configuration settings)' onChange={this.handleSecretChange} />
         </Form>
       </Fragment>
     );
@@ -385,13 +383,6 @@ export class ConfigurationEditorModal extends Component {
 
     this.isEditMode = (props.mode === 'edit');
     this.isCreateMode = (props.mode === 'create');
-
-    this.open = this.open.bind(this);
-    this.close = this.close.bind(this);
-    this.handleConfigurationChange = this.handleConfigurationChange.bind(this);
-
-    this.createConfiguration = this.createConfiguration.bind(this);
-    this.saveConfiguration = this.saveConfiguration.bind(this);
   }
 
   getDefaultState() {
@@ -402,7 +393,7 @@ export class ConfigurationEditorModal extends Component {
     };
   }
 
-  open() {
+  open = () => {
     const defaultState = this.getDefaultState();
 
     this.setState({
@@ -411,40 +402,35 @@ export class ConfigurationEditorModal extends Component {
     });
   }
 
-  close() {
+  close = () => {
     this.setState({
       open: false
     });
   }
 
-  handleConfigurationChange(configuration) {
+  handleConfigurationChange = (configuration) => {
     this.setState({ configuration });
   }
 
-  createConfiguration() {
-  }
-
-  saveConfiguration() {
+  submit = () => {
+    this.props.onSubmit(this.state.configuration);
+    this.close();
   }
 
   render() {
-    const modeText = (this.isEditMode ? "Edit Configuration" : "New Configuration");
+    const triggerText = (this.isEditMode ? "Edit Configuration" : "New Configuration");
+    const trigger = <Button>{triggerText}</Button>;
 
-    const trigger = <Form><Form.Group><Button>{modeText}</Button></Form.Group></Form>;
-
-    const primary = (this.isEditMode
-      ? <Button primary onClick={this.saveConfiguration}>Save Changes</Button>
-      : <Button primary onClick={this.createConfiguration}>Create</Button>
-    );
+    const primaryText = (this.isEditMode ? "Save Changes" : "Create");
 
     return (
       <Modal open={this.state.open} onOpen={this.open} onClose={this.close} trigger={trigger} size='fullscreen'>
-        <Modal.Header>{modeText}</Modal.Header>
+        <Modal.Header>{triggerText}</Modal.Header>
         <Modal.Content>
           <EditConfigurationPanel configuration={this.state.configuration} onConfigurationChanged={this.handleConfigurationChange} />
         </Modal.Content>
         <Modal.Actions>
-          {primary}
+          <Button primary onClick={this.submit}>{primaryText}</Button>
           <Button onClick={this.close}>Cancel</Button>
         </Modal.Actions>
       </Modal>
@@ -456,19 +442,12 @@ export class LoadConfigurationModal extends Component {
   constructor(props) {
     super(props);
 
-    this.state = this.getDefaultState();
-
-    this.open = this.open.bind(this);
-    this.close = this.close.bind(this);
-
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSearch = this.handleSearch.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.state = this.getDefaultState(false);
   }
 
-  getDefaultState() {
+  getDefaultState(open) {
     return {
-      open: false,
+      open: open,
       id: null,
       configuration: null,
       searching: false,
@@ -476,37 +455,39 @@ export class LoadConfigurationModal extends Component {
     };
   }
 
-  open() {
-    const defaultState = this.getDefaultState();
+  open = () => {
+    const defaultState = this.getDefaultState(true);
 
     this.setState({
-      ...defaultState,
-      open: true
+      ...defaultState
     });
   }
 
-  close() {
+  close = () => {
     this.setState({
       open: false
     });
   }
 
-  handleChange(event, { name, value }) {
+  handleChange = (event, { name, value }) => {
     this.setState({
       [name]: value
     });
   }
 
-  handleSearch() {
+  handleLoad = () => {
     this.setState({
       searching: true,
       configuration: null
     });
 
-    const configuration = storage.getConfiguration(this.state.id);
-    if (configuration === null) {
+    let configuration = null;
+    try {
+      configuration = this.props.decode(this.state.id);
+    }
+    catch (ex) {
       this.setState({
-        error: `could not find ${this.state.id}`
+        error: ex.toString()
       });
     }
 
@@ -516,12 +497,12 @@ export class LoadConfigurationModal extends Component {
     });
   }
 
-  handleSubmit() {
-    this.props.onConfigurationSelected(this.state.configuration);
+  handleSubmit = () => {
+    this.props.onSubmit(this.state.configuration);
     this.close();
   }
 
-  renderSearching() {
+  renderLoading() {
     if (!this.state.searching) {
       return null;
     }
@@ -547,12 +528,12 @@ export class LoadConfigurationModal extends Component {
     }
 
     return (
-      <p>Configuration Found: <b>{this.state.configuration.name}</b></p>
+      <p>Configuration Loaded: <b>{this.state.configuration.name}</b></p>
     );
   }
 
   render() {
-    const trigger = <Form><Form.Group><Button>Load Configuration</Button></Form.Group></Form>;
+    const trigger = <Button>Load Configuration</Button>;
     const disabledLoad = this.state.configuration === null;
 
     return (
@@ -561,11 +542,11 @@ export class LoadConfigurationModal extends Component {
         <Modal.Content>
           <Form>
             <Form.Field>
-              <label>Configuration ID</label>
-              <Input name="id" type='text' placeholder='Enter Configuration ID' onChange={this.handleChange} />
+              <label>Share URL</label>
+              <Input name="id" type='text' placeholder='Enter Share URL' onChange={this.handleChange} />
             </Form.Field>
-            <Button onClick={this.handleSearch}>Search</Button>
-            {this.renderSearching()}
+            <Button onClick={this.handleLoad}>Search</Button>
+            {this.renderLoading()}
             {this.renderError()}
             {this.renderLoaded()}
           </Form>
@@ -573,6 +554,43 @@ export class LoadConfigurationModal extends Component {
         <Modal.Actions>
           <Button primary onClick={this.handleSubmit} disabled={disabledLoad}>Load</Button>
           <Button onClick={this.close}>Cancel</Button>
+        </Modal.Actions>
+      </Modal>
+    );
+  }
+}
+
+export class ShareConfigurationModal extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      open: false
+    };
+  }
+
+  open = () => {
+    this.setState({
+      open: true
+    });
+  }
+
+  close = () => {
+    this.setState({
+      open: false
+    });
+  }
+
+  render() {
+    return (
+      <Modal open={this.state.open} onOpen={this.open} onClose={this.close} trigger={<Button disabled={this.props.disabled}>Share Configuration</Button>}>
+        <Modal.Header>Share Configuration</Modal.Header>
+        <Modal.Content>
+          <p>You can share this configuration via:</p>
+          <p><a style={{overflowWrap: 'break-word'}} href={this.props.shareUrl}>{this.props.shareUrl}</a></p>
+        </Modal.Content>
+        <Modal.Actions>
+          <Button onClick={this.close}>OK</Button>
         </Modal.Actions>
       </Modal>
     );
