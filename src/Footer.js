@@ -3,11 +3,7 @@ import { Container, Header, List, Segment } from 'semantic-ui-react';
 
 export function Footer(props) {
   return (
-    <Segment
-      inverted
-      vertical
-      style={{ margin: '2em 0em 0em', padding: '2em 0em' }}
-    >
+    <Segment inverted vertical style={{ margin: '2em 0em 0em', padding: '2em 0em' }}>
       <Container>
         <Header inverted as='h4' content='Help' />
         <List link inverted>

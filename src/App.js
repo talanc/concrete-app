@@ -11,7 +11,7 @@ import './App.css';
 const slabThickness_100 = { key: '100', text: '100mm', value: 100 };
 const slabThickness_125 = { key: '125', text: '125mm', value: 125 };
 
-const slabThicknessOptions = [ slabThickness_100, slabThickness_125 ];
+const slabThicknessOptions = [slabThickness_100, slabThickness_125];
 
 const meshThickness_SL72 = { key: 'SL72', text: 'SL72', value: 'SL72' };
 const meshThickness_SL82 = { key: 'SL82', text: 'SL82', value: 'SL82' };
@@ -479,6 +479,8 @@ class App extends Component {
   }
 
   render() {
+    const columnWidth = 5;
+
     return (
       <Fragment>
         <Menu inverted borderless style={{ borderRadius: '0' }}>
@@ -490,13 +492,18 @@ class App extends Component {
           </Container>
         </Menu>
         <Container>
-          <Grid stackable columns='equal'>
-            <Grid.Column>
-              {this.renderInput()}
-            </Grid.Column>
-            <Grid.Column>
-              {this.renderOutput()}
-            </Grid.Column>
+          <Grid centered>
+            <Grid.Row>
+              <Grid.Column width={columnWidth}>
+                {this.renderInput()}
+              </Grid.Column>
+            </Grid.Row>
+            <Grid.Row>
+              <Grid.Column width={columnWidth}>
+                <Divider />
+                {this.renderOutput()}
+              </Grid.Column>
+            </Grid.Row>
           </Grid>
           <Divider />
           <Grid columns='equal'>
