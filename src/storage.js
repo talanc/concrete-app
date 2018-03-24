@@ -14,5 +14,10 @@ export function decodeConfiguration(configurationString) {
 }
 
 export function getShareConfigurationUrl(configuration) {
-  return "http://example.com/?cfg=" + encodeConfiguration(configuration);
+  const baseUrl = window.location.protocol + "//" + window.location.host + "/" + window.location.pathname.split('/')[1];
+  return baseUrl + '?cfg=' + encodeConfiguration(configuration);
+}
+
+export function isShareUrl(configurationString) {
+  return configurationString.indexOf('?cfg=') !== -1;
 }

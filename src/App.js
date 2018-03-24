@@ -76,6 +76,16 @@ class App extends Component {
     // load initial state
     this.state = getDefaultAppState();
 
+    if (storage.isShareUrl(window.location.href)) {
+      try {
+        this.state.configuration = storage.decodeConfiguration(window.location.href);
+      }
+      catch (error) {
+        console.log('could not load from url bar');
+        console.error(error);
+      }
+    }
+
     // load configuration
     /*const configurationId = storage.getCacheConfigurationId();
     if (configurationId !== null) {
