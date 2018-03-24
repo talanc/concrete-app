@@ -11,7 +11,7 @@ export function Footer(props) {
       <Container>
         <Header inverted as='h4' content='Help' />
         <List link inverted>
-          <List.Item as='a' target="_blank" rel="noopener noreferrer" href='https://github.com/talanc/concrete-app/docs/sharing-configurations.md'>Sharing Configurations</List.Item>
+          <List.Item as='a' target="_blank" rel="noopener noreferrer" href='https://github.com/talanc/concrete-app/blob/master/docs/sharing-configurations.md'>Sharing Configurations</List.Item>
           <List.Item as='a' target="_blank" rel="noopener noreferrer" href='https://github.com/talanc/concrete-app'>Source Code</List.Item>
         </List>
       </Container>
