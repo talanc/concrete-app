@@ -5,6 +5,7 @@ import * as conf from './conf';
 import * as storage from './storage';
 import * as util from './util';
 import logo from './logo.svg';
+import Footer from './Footer';
 import './App.css';
 
 const slabThickness_100 = { key: '100', text: '100mm', value: 100 };
@@ -504,6 +505,7 @@ class App extends Component {
             </Grid.Column>
           </Grid>
         </Container>
+        <Footer />
       </Fragment>
     );
   }

@@ -17,7 +17,6 @@ Travis CI: [![Build Status](https://travis-ci.org/talanc/concrete-app.svg?branch
 
 ## TODO List
 
-* Add footer
 * Import / export file
 * Layout: Input->Output on top of each other instead of side to side
-* Firebase integration
+* compact share urls

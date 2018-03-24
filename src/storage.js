@@ -3,7 +3,7 @@ export function encodeConfiguration(configuration) {
 }
 
 export function decodeConfiguration(configurationString) {
-  // make share urls compatible
+  // allow decoding of share urls
   const i = configurationString.indexOf('?cfg=');
   if (i !== -1) {
     const start = i + '?cfg='.length;
