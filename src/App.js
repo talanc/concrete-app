@@ -460,12 +460,25 @@ class App extends Component {
     );
   }
 
+  renderConfigDefaultWarning() {
+    return (
+      <Message
+        warning
+        icon='warning sign'
+        header='Default Configuration'
+        content="You're using the Default Configuration. Please create or load configuration before considering the Output."
+      />
+    );
+  }
+
   renderConfig() {
     const configuration = this.getConfiguration();
+    const warning = (configuration.isDefault ? this.renderConfigDefaultWarning() : null);
 
     return (
       <Fragment>
         <Header as='h2'>Configuration: {configuration.name}</Header>
+        {warning}
         <Form>
           <Form.Group>
             <conf.ConfigurationEditorModal mode='create' configuration={configuration} onSubmit={this.handleConfigurationChange} />
