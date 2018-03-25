@@ -1,16 +1,78 @@
-export function encodeConfiguration(configuration) {
-  return encodeURIComponent(btoa(JSON.stringify(configuration)));
+import base64url from 'base64url';
+import msgpack from 'msgpack-lite';
+
+const encodeMap = {
+  'isDefault': 'e',
+  'name': 'n',
+  'concreteRates': 'c',
+  'key': 'k',
+  'limit': 'l',
+  'rate': 'r',
+  'slabThickness125': 's',
+  'meshThicknessSL82': 'm',
+  'pumpOn': 'p',
+  'pumpDouble': 'd',
+  'polyMembraneOn': 'b',
+  'rock': 'o',
+  'taxRate': 't'
+};
+
+const decodeMap = reverseMap(encodeMap);
+
+function renameKeys(obj, mapper) {
+  let newObj = {};
+  Object.entries(obj).forEach(([key, value]) => {
+    const newKey = mapper[key] || key;
+
+    let newValue = value;
+    if (value instanceof Array) {
+      newValue = value.map(curr => renameKeys(curr, mapper));
+    }
+    else if (value instanceof Object) {
+      newValue = renameKeys(value, mapper);
+    }
+
+    newObj[newKey] = newValue;
+  });
+  return newObj;
 }
 
-export function decodeConfiguration(configurationString) {
+function reverseMap(obj) {
+  let rev = {};
+  Object.entries(obj).forEach(([key, value]) => {
+    if (rev[value]) {
+      throw new Error(`duplicate value found for ${rev[value]} and ${key}`);
+    }
+    rev[value] = key;
+  });
+  return rev;
+}
+
+export function encodeConfiguration(configuration) {
+  // renameKeys -> msgpack -> base64url -> uri
+  const step1 = renameKeys(configuration, encodeMap);
+  const step2 = msgpack.encode(step1);
+  const step3 = base64url.encode(step2);
+  const step4 = encodeURIComponent(step3);
+
+  return step4;
+}
+
+export function decodeConfiguration(encodedConfiguration) {
   // allow decoding of share urls
-  const i = configurationString.indexOf('?cfg=');
+  const i = encodedConfiguration.indexOf('?cfg=');
   if (i !== -1) {
     const start = i + '?cfg='.length;
-    configurationString = configurationString.substring(start);
+    encodedConfiguration = encodedConfiguration.substring(start);
   }
 
-  return JSON.parse(atob(decodeURIComponent(configurationString)));
+  // uri -> base64url -> msgpack -> renameKeys
+  const step1 = decodeURIComponent(encodedConfiguration);
+  const step2 = base64url.toBuffer(step1);
+  const step3 = msgpack.decode(step2);
+  const step4 = renameKeys(step3, decodeMap);
+
+  return step4;
 }
 
 export function getShareConfigurationUrl(configuration) {

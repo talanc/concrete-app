@@ -3,8 +3,15 @@ import { Button, Form, Header, Input, Grid, Label, Modal, Popup, Table } from 's
 import { sqm } from './util';
 import * as util from './util';
 
-function generateKey() {
-  return Math.random().toString();
+function generateKey(arr) {
+  const fn = (curr) => curr.key === key;
+
+  let key = arr.length;
+  while (true) {
+    if (arr.filter(fn).length === 0)
+      return key;
+    key++;
+  }
 }
 
 export function generateDisplay(rates) {
@@ -32,12 +39,12 @@ export function generateDefaultConfiguration() {
     isDefault: true,
     name: "Default",
     concreteRates: [
-      { key: generateKey(), limit: 10, rate: 101 },
-      { key: generateKey(), limit: 20, rate: 95 },
-      { key: generateKey(), limit: 40, rate: 90 },
-      { key: generateKey(), limit: 60, rate: 80 },
-      { key: generateKey(), limit: 120, rate: 70 },
-      { key: generateKey(), limit: null, rate: 63 },
+      { key: 0, limit: 10, rate: 101 },
+      { key: 1, limit: 20, rate: 95 },
+      { key: 2, limit: 40, rate: 90 },
+      { key: 3, limit: 60, rate: 80 },
+      { key: 4, limit: 120, rate: 70 },
+      { key: 5, limit: null, rate: 63 },
     ],
     slabThickness125: 10,
     meshThicknessSL82: 4.5,
@@ -168,7 +175,7 @@ export class EditConfigurationPanel extends Component {
     const thisRow = configuration.concreteRates[i];
     const prevRow = configuration.concreteRates[i - 1];
 
-    const key = generateKey();
+    const key = generateKey(configuration.concreteRates);
 
     let limit;
     if (thisRow.limit === null) {

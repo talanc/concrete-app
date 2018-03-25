@@ -17,5 +17,5 @@ Travis CI: [![Build Status](https://travis-ci.org/talanc/concrete-app.svg?branch
 
 ## TODO List
 
+* help docs for sharing
 * Import / export file
-* compact share urls
