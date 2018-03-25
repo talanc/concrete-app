@@ -92,11 +92,18 @@ class ConcreteRateRow extends Component {
     const buttonAdd = <Button icon='add' onClick={this.handleAdd} />;
     const buttonRemove = <Button disabled={this.props.limit == null} icon='minus' onClick={this.handleRemove} />;
 
+    let limit;
+    if (this.props.limit) {
+      limit = this.props.limit;
+    }
+    else if (this.props.prevLimit) {
+      limit = `More than ${this.props.prevLimit}`;
+    }
+
     return (
       <Table.Row>
         <Table.Cell>
-          <Input disabled={this.props.limit == null} defaultValue={this.props.limit} placeholder="..." onChange={this.handleLimitChange}
-          />
+          <Input disabled={this.props.limit == null} defaultValue={limit} placeholder="..." onChange={this.handleLimitChange} />
         </Table.Cell>
         <Table.Cell>
           <Input label='$' defaultValue={this.props.rate} placeholder="..." onChange={this.handleRateChange} />
@@ -256,12 +263,14 @@ export class EditConfigurationPanel extends Component {
 
   renderRow(i) {
     const configuration = this.getConfiguration();
+    const prevLimit = (i > 0 ? configuration.concreteRates[i - 1].limit : null);
 
     return (
       <ConcreteRateRow
         key={configuration.concreteRates[i].key}
         limit={configuration.concreteRates[i].limit}
         rate={configuration.concreteRates[i].rate}
+        prevLimit={prevLimit}
         onAdd={() => this.handleAddRow(i)}
         onRemove={() => this.handleRemoveRow(i)}
         onLimitChange={(newLimit) => this.handleLimitChange(i, newLimit)}
@@ -366,7 +375,12 @@ export class EditConfigurationPanel extends Component {
 
     return (
       <Fragment>
-        <Grid columns="2">
+        <Form>
+          <Form.Group>
+            <Form.Input name='name' label='Configuration Name' type='text' placeholder='Configuration Name' value={configuration.name} onChange={this.handleNameChange} />
+          </Form.Group>
+        </Form>
+        <Grid columns="2" stackable>
           <Grid.Column>
             {this.renderConcreteRates()}
           </Grid.Column>
@@ -374,9 +388,6 @@ export class EditConfigurationPanel extends Component {
             {this.renderExtras()}
           </Grid.Column>
         </Grid>
-        <Form>
-          <Form.Input name='name' label='Configuration Name' type='text' placeholder='Configuration Name' value={configuration.name} onChange={this.handleNameChange} />
-        </Form>
       </Fragment>
     );
   }
@@ -594,7 +605,7 @@ export class ShareConfigurationModal extends Component {
         <Modal.Header>Share Configuration</Modal.Header>
         <Modal.Content>
           <p>You can share this configuration via:</p>
-          <p><a style={{overflowWrap: 'break-word'}} href={this.props.shareUrl}>{this.props.shareUrl}</a></p>
+          <p><a style={{ overflowWrap: 'break-word' }} href={this.props.shareUrl}>{this.props.shareUrl}</a></p>
         </Modal.Content>
         <Modal.Actions>
           <Button onClick={this.close}>OK</Button>
