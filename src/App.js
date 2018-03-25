@@ -501,8 +501,6 @@ class App extends Component {
   }
 
   render() {
-    const columnWidth = 5;
-
     return (
       <Fragment>
         <Menu inverted borderless style={{ borderRadius: '0' }}>
@@ -516,23 +514,15 @@ class App extends Component {
         <Container>
           <Grid centered>
             <Grid.Row>
-              <Grid.Column width={columnWidth}>
+              <Grid.Column mobile={16} tablet={8} computer={5}>
                 {this.renderInput()}
-              </Grid.Column>
-            </Grid.Row>
-            <Grid.Row>
-              <Grid.Column width={columnWidth}>
                 <Divider />
                 {this.renderOutput()}
               </Grid.Column>
             </Grid.Row>
           </Grid>
           <Divider />
-          <Grid columns='equal'>
-            <Grid.Column>
-              {this.renderConfig()}
-            </Grid.Column>
-          </Grid>
+          {this.renderConfig()}
         </Container>
         <Footer />
       </Fragment>
