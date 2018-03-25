@@ -88,7 +88,15 @@ export function isShareUrl(configurationString) {
 
 const keyAppState = "appState";
 
+function isLocalStorageAvailable() {
+  return window.localStorage !== undefined;
+}
+
 export function getStoredAppState() {
+  if (!isLocalStorageAvailable()) {
+    return null;
+  }
+
   const json = localStorage.getItem(keyAppState);
   if (json !== null) {
     try {
@@ -104,6 +112,10 @@ export function getStoredAppState() {
 }
 
 export function setStoredAppState(appState) {
+  if (!isLocalStorageAvailable()) {
+    return;
+  }
+
   const json = JSON.stringify(appState);
   localStorage.setItem(keyAppState, json);
 }
