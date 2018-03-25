@@ -21,7 +21,8 @@ const decodeMap = reverseMap(encodeMap);
 
 function renameKeys(obj, mapper) {
   let newObj = {};
-  Object.entries(obj).forEach(([key, value]) => {
+  Object.keys(obj).forEach(key => {
+    const value = obj[key];
     const newKey = mapper[key] || key;
 
     let newValue = value;
@@ -39,7 +40,8 @@ function renameKeys(obj, mapper) {
 
 function reverseMap(obj) {
   let rev = {};
-  Object.entries(obj).forEach(([key, value]) => {
+  Object.keys(obj).forEach(key => {
+    const value = obj[key];
     if (rev[value]) {
       throw new Error(`duplicate value found for ${rev[value]} and ${key}`);
     }
