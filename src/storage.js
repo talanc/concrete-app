@@ -85,3 +85,25 @@ export function getShareConfigurationUrl(configuration) {
 export function isShareUrl(configurationString) {
   return configurationString.indexOf('?cfg=') !== -1;
 }
+
+const keyAppState = "appState";
+
+export function getStoredAppState() {
+  const json = localStorage.getItem(keyAppState);
+  if (json !== null) {
+    try {
+      const appState = JSON.parse(json);
+      return appState;
+    }
+    catch (error) {
+      console.log("could not load stored configuration, see below");
+      console.warn(error);
+    }
+  }
+  return null;
+}
+
+export function setStoredAppState(appState) {
+  const json = JSON.stringify(appState);
+  localStorage.setItem(keyAppState, json);
+}

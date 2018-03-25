@@ -72,26 +72,25 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    //console.log(props);
-
     // load initial state
     this.state = getDefaultAppState();
+    
+    // load job + configuration
+    const storedAppState = storage.getStoredAppState();
+    if (storedAppState !== null) {
+      this.state = storedAppState;
+    }
 
+    // load configuration from url
     if (storage.isShareUrl(window.location.href)) {
       try {
         this.state.configuration = storage.decodeConfiguration(window.location.href);
       }
       catch (error) {
-        console.log('could not load from url bar');
+        console.log('could not load from url bar, see details below');
         console.error(error);
       }
     }
-
-    // load configuration
-    /*const configurationId = storage.getCacheConfigurationId();
-    if (configurationId !== null) {
-      this.state.configuration = storage.getConfiguration(configurationId);
-    }*/
 
     // update forces
     this.state = {
@@ -112,6 +111,8 @@ class App extends Component {
     this.setState({
       configuration
     });
+
+    this.saveAppState();
   }
 
   handleInputChange = (event, { name, value }) => {
@@ -122,7 +123,15 @@ class App extends Component {
     this.setState(prevState => {
       const forces = this.getStateForces(prevState);
       return forces;
-    })
+    });
+
+    this.saveAppState();
+  }
+
+  saveAppState() {
+    this.setState(prevState => {
+      storage.setStoredAppState(prevState);
+    });
   }
 
   getStateForces(prevState) {
