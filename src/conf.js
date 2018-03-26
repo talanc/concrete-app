@@ -103,10 +103,10 @@ class ConcreteRateRow extends Component {
     return (
       <Table.Row>
         <Table.Cell>
-          <Input disabled={this.props.limit == null} defaultValue={limit} placeholder="..." onChange={this.handleLimitChange} />
+          <Input disabled={this.props.limit == null} value={limit} placeholder="..." onChange={this.handleLimitChange} />
         </Table.Cell>
         <Table.Cell>
-          <Input label='$' defaultValue={this.props.rate} placeholder="..." onChange={this.handleRateChange} />
+          <Input label='$' value={this.props.rate} placeholder="..." onChange={this.handleRateChange} />
         </Table.Cell>
         <Table.Cell>
           <Button.Group>
@@ -335,7 +335,7 @@ export class EditConfigurationPanel extends Component {
           {displayName}
         </Table.Cell>
         <Table.Cell>
-          <Input name={name} labelPosition={labelPosition} defaultValue={value} onChange={this.handleExtraChange}>
+          <Input name={name} labelPosition={labelPosition} value={value} onChange={this.handleExtraChange}>
             {label1}
             <input />
             {label2}

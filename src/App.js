@@ -105,9 +105,6 @@ class App extends Component {
       isDefault: false
     };
 
-    console.log(storage.encodeConfiguration(configuration));
-    console.log(storage.encodeConfiguration(configuration).length);
-
     this.setState({
       configuration
     });
