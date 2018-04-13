@@ -14,6 +14,7 @@ export function generateKey(arr) {
 export function migrateConfiguration(configuration) {
   // migrate rock: number to a rates system (like concreteRates)
   if (typeof configuration.rock === 'number') {
+    console.log("migrateConfiguration: rock rates system");
     const rock = configuration.rock;
     configuration = {
       ...configuration,
