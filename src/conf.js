@@ -1,10 +1,9 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Form, Header, Input, Grid, Label, Modal, Table } from 'semantic-ui-react';
-import { sqm } from './util';
 import * as util from './util';
 import RatesEditor from './components/RatesEditor';
 
-export function generateDisplay(rates) {
+export function generateDisplay(rates, displayValue) {
   let old = null;
 
   return rates.map(value => {
@@ -12,14 +11,14 @@ export function generateDisplay(rates) {
     old = value;
 
     if (prev === null) {
-      return <Fragment>Less than {sqm(value.limit)}</Fragment>;
+      return <Fragment>Less than {value.limit}{displayValue}</Fragment>;
     }
 
     if (value.limit === null) {
-      return <Fragment>Over {sqm(prev.limit)}</Fragment>;
+      return <Fragment>Over {prev.limit}{displayValue}</Fragment>;
     }
 
-    return <Fragment>{sqm(prev.limit)} to {sqm(value.limit)}</Fragment>;
+    return <Fragment>{prev.limit}{displayValue} to {value.limit}{displayValue}</Fragment>;
   });
 }
 
@@ -41,7 +40,10 @@ export function generateDefaultConfiguration() {
     pumpOn: 25,
     pumpDouble: 50,
     polyMembraneOn: 2,
-    rock: 5,
+    rock: [
+      { key: 0, limit: 100, rate: 10},
+      { key: 1, limit: null, rate: 5}
+    ],
     taxRate: 10
   };
 }
@@ -160,7 +162,6 @@ export class EditConfigurationPanel extends Component {
             {this.renderExtra("polyMembraneOn", "Poly Membrane", "m2")}
             {this.renderExtra("pumpOn", "Pump", "ea")}
             {this.renderExtra("pumpDouble", "Pump (Double)", "ea")}
-            {this.renderExtra("rock", "Rock", "m3")}
             {this.renderExtra("taxRate", "Tax Rate", "pct")}
           </Table.Body>
         </Table>
@@ -178,11 +179,17 @@ export class EditConfigurationPanel extends Component {
             <Form.Input name='name' label='Configuration Name' type='text' placeholder='Configuration Name' value={configuration.name} onChange={this.handleNameChange} />
           </Form.Group>
         </Form>
-        <Grid columns="2" stackable>
+        <Grid columns="3" stackable>
           <Grid.Column>
             <Header as='h4'>Concrete Rates</Header>
             <RatesEditor name1='Concrete' name2={<Fragment>Rate per m<sup>2</sup></Fragment>}
               rates={configuration.concreteRates} onChange={this.handleConcreteRateChange} />
+          </Grid.Column>
+          <Grid.Column>
+            <Header as='h4'>Rock Rates</Header>
+            <RatesEditor name1='Rock' name2={<Fragment>Rate per {util.per_m3}</Fragment>}
+              rates={configuration.rock} onChange={this.handleRockChange}
+            />
           </Grid.Column>
           <Grid.Column>
             {this.renderExtras()}

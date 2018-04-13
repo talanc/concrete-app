@@ -74,7 +74,7 @@ class App extends Component {
 
     // load initial state
     this.state = getDefaultAppState();
-    
+
     // load job + configuration
     const storedAppState = storage.getStoredAppState();
     if (storedAppState !== null) {
@@ -204,18 +204,28 @@ class App extends Component {
     return this.state.configuration;
   }
 
+  findRate(limit, rates) {
+    let rate = rates.find(rate => {
+      return limit < rate.limit
+    });
+    if (rate == null) {
+      rate = rates[rates.length - 1];
+    }
+
+    return rate;
+  }
+
   getCurrentRate() {
     const area = this.getArea();
     const configuration = this.getConfiguration();
 
-    let rate = configuration.concreteRates.find(rate => {
-      return area < rate.limit
-    });
-    if (rate == null) {
-      rate = configuration.concreteRates[configuration.concreteRates.length - 1];
-    }
+    return this.findRate(area, configuration.concreteRates);
+  }
 
-    return rate;
+  getRockRate() {
+    const configuration = this.getConfiguration();
+
+    return this.findRate(this.getRock(), configuration.rock);
   }
 
   getMeshThickness() {
@@ -251,7 +261,7 @@ class App extends Component {
     }
 
     const area = this.getArea();
-    
+
     const rate = this.getCurrentRate();
     add("Base Slab", area * rate.rate);
 
@@ -277,7 +287,7 @@ class App extends Component {
 
     const rock = this.getRock();
     if (rock > 0) {
-      add("Rock", rock * configuration.rock);
+      add("Rock", rock * this.getRockRate().rate);
     }
 
     return {
@@ -407,12 +417,10 @@ class App extends Component {
     );
   }
 
-  renderConfigInfo() {
-    const configuration = this.getConfiguration();
-    const activeRate = this.getCurrentRate();
-    const displays = generateDisplay(configuration.concreteRates);
+  renderRatesTable(name, scale, rates, activeRate) {
+    const displays = generateDisplay(rates, scale);
 
-    const rates = configuration.concreteRates.map((rate, i) => {
+    const displayRates = rates.map((rate, i) => {
       const display = displays[i];
       const active = (rate === activeRate);
 
@@ -425,21 +433,31 @@ class App extends Component {
     });
 
     return (
+      <Table celled>
+        <Table.Header>
+          <Table.Row>
+            <Table.HeaderCell>{name}</Table.HeaderCell>
+            <Table.HeaderCell>Rate per {scale}</Table.HeaderCell>
+          </Table.Row>
+        </Table.Header>
+        <Table.Body>
+          {displayRates}
+        </Table.Body>
+      </Table>
+    );
+  }
+
+  renderConfigInfo() {
+    const configuration = this.getConfiguration();
+
+    return (
       <Fragment>
         <Grid columns='equal'>
           <Grid.Column>
             <Header as='h4'>Concrete Rates</Header>
-            <Table celled>
-              <Table.Header>
-                <Table.Row>
-                  <Table.HeaderCell>Concrete</Table.HeaderCell>
-                  <Table.HeaderCell>Rate per m<sup>2</sup></Table.HeaderCell>
-                </Table.Row>
-              </Table.Header>
-              <Table.Body>
-                {rates}
-              </Table.Body>
-            </Table>
+            {this.renderRatesTable('Concrete', util.m2, configuration.concreteRates, this.getCurrentRate())}
+            <Header as='h4'>Rock Rates</Header>
+            {this.renderRatesTable('Rock', util.m3, configuration.rock, this.getRockRate())}
           </Grid.Column>
           <Grid.Column>
             <Header as='h4'>Extras</Header>
@@ -456,7 +474,6 @@ class App extends Component {
                 {this.renderConfigExtra("Poly Membrane", configuration.polyMembraneOn, "m2", this.state.polyMembrane === polyMembrane_On.value)}
                 {this.renderConfigExtra("Pump", configuration.pumpOn, "ea", this.getPump() === pumpOption_On.value)}
                 {this.renderConfigExtra("Pump (Double)", configuration.pumpDouble, "ea", this.getPump() === pumpOption_Double.value)}
-                {this.renderConfigExtra("Rock", configuration.rock, "m3", this.getRock() > 0)}
               </Table.Body>
             </Table>
           </Grid.Column>

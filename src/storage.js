@@ -1,5 +1,6 @@
 import base64url from 'base64url';
 import msgpack from 'msgpack-lite';
+import * as util from './util';
 
 const encodeMap = {
   'isDefault': 'e',
@@ -74,7 +75,10 @@ export function decodeConfiguration(encodedConfiguration) {
   const step3 = msgpack.decode(step2);
   const step4 = renameKeys(step3, decodeMap);
 
-  return step4;
+  // finally, migrate
+  const configuration = util.migrateConfiguration(step4);
+
+  return configuration;
 }
 
 export function getShareConfigurationUrl(configuration) {
@@ -101,6 +105,7 @@ export function getStoredAppState() {
   if (json !== null) {
     try {
       const appState = JSON.parse(json);
+      appState.configuration = util.migrateConfiguration(appState.configuration);
       return appState;
     }
     catch (error) {
