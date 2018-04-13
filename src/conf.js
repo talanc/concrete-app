@@ -1,18 +1,8 @@
 import React, { Component, Fragment } from 'react';
-import { Button, Form, Header, Input, Grid, Label, Modal, Popup, Table } from 'semantic-ui-react';
+import { Button, Form, Header, Input, Grid, Label, Modal, Table } from 'semantic-ui-react';
 import { sqm } from './util';
 import * as util from './util';
-
-function generateKey(arr) {
-  const fn = (curr) => curr.key === key;
-
-  let key = arr.length;
-  while (true) {
-    if (arr.filter(fn).length === 0)
-      return key;
-    key++;
-  }
-}
+import RatesEditor from './components/RatesEditor';
 
 export function generateDisplay(rates) {
   let old = null;
@@ -56,69 +46,6 @@ export function generateDefaultConfiguration() {
   };
 }
 
-class ConcreteRateRow extends Component {
-  constructor(props) {
-    super(props);
-
-    this.handleLimitChange = this.handleLimitChange.bind(this);
-    this.handleRateChange = this.handleRateChange.bind(this);
-    this.handleAdd = this.handleAdd.bind(this);
-    this.handleRemove = this.handleRemove.bind(this);
-  }
-
-  handleLimitChange(event, { value }) {
-    var limit = parseFloat(value);
-    if (!isNaN(limit)) {
-      this.props.onLimitChange(limit);
-    }
-  }
-
-  handleRateChange(event, { value }) {
-    var rate = parseFloat(value);
-    if (!isNaN(rate)) {
-      this.props.onRateChange(rate);
-    }
-  }
-
-  handleAdd() {
-    this.props.onAdd();
-  }
-
-  handleRemove() {
-    this.props.onRemove();
-  }
-
-  render() {
-    const buttonAdd = <Button icon='add' onClick={this.handleAdd} />;
-    const buttonRemove = <Button disabled={this.props.limit == null} icon='minus' onClick={this.handleRemove} />;
-
-    let limit;
-    if (this.props.limit) {
-      limit = this.props.limit;
-    }
-    else if (this.props.prevLimit) {
-      limit = `More than ${this.props.prevLimit}`;
-    }
-
-    return (
-      <Table.Row>
-        <Table.Cell>
-          <Input type='number' disabled={this.props.limit == null} value={limit} placeholder="..." onChange={this.handleLimitChange} />
-        </Table.Cell>
-        <Table.Cell>
-          <Input type='number' label='$' value={this.props.rate} placeholder="..." onChange={this.handleRateChange} />
-        </Table.Cell>
-        <Table.Cell>
-          <Button.Group>
-            <Popup trigger={buttonAdd} content="Insert a new line above" />
-            <Popup trigger={buttonRemove} content="Remove this line" />
-          </Button.Group>
-        </Table.Cell>
-      </Table.Row>
-    );
-  }
-}
-
 export class EditConfigurationPanel extends Component {
   constructor(props) {
     super(props);
@@ -127,10 +54,6 @@ export class EditConfigurationPanel extends Component {
       configuration: props.configuration,
       secret: null
     };
-
-    this.handleSecretChange = this.handleSecretChange.bind(this);
-    this.handleNameChange = this.handleNameChange.bind(this);
-    this.handleExtraChange = this.handleExtraChange.bind(this);
   }
 
   getConfiguration() {
@@ -148,25 +71,19 @@ export class EditConfigurationPanel extends Component {
     this.props.onConfigurationChanged(configuration);
   }
 
-  handleSecretChange(secret) {
+  handleSecretChange = (secret) => {
     this.setState({
       secret: secret
     });
   }
 
-  setConcreteRates(concreteRates) {
-    this.updateConfiguration({
-      concreteRates: concreteRates
-    });
-  }
-
-  handleNameChange(event, { name, value }) {
+  handleNameChange = (event, { name, value }) => {
     this.updateConfiguration({
       [name]: value
     });
   }
 
-  handleExtraChange(event, { name, value }) {
+  handleExtraChange = (event, { name, value }) => {
     value = parseFloat(value);
     if (isNaN(value)) {
       value = 0;
@@ -177,129 +94,10 @@ export class EditConfigurationPanel extends Component {
     });
   }
 
-  handleAddRow(i) {
-    const configuration = this.getConfiguration();
-    const thisRow = configuration.concreteRates[i];
-    const prevRow = configuration.concreteRates[i - 1];
-
-    const key = generateKey(configuration.concreteRates);
-
-    let limit;
-    if (thisRow.limit === null) {
-      if (prevRow) {
-        limit = prevRow.limit * 2;
-      }
-      else {
-        limit = 10;
-      }
-    }
-    else if (prevRow) {
-      limit = (thisRow.limit + prevRow.limit) / 2;
-    }
-    else {
-      limit = thisRow.limit / 2;
-    }
-    limit = Math.round(limit);
-
-    let rate;
-    if (prevRow) {
-      rate = Math.round((thisRow.rate + prevRow.rate) / 2);
-    }
-    else {
-      rate = Math.round(thisRow.rate * 1.5);
-    }
-    rate = Math.round(rate);
-
-    const item = { key, limit, rate };
-
-    const concreteRates = configuration.concreteRates.slice();
-    concreteRates.splice(i, 0, item);
-
-    this.setConcreteRates(concreteRates);
-  }
-
-  handleRemoveRow(i) {
-    const configuration = this.getConfiguration();
-    const concreteRates = configuration.concreteRates.slice();
-    concreteRates.splice(i, 1);
-
-    this.setConcreteRates(concreteRates);
-  }
-
-  handleLimitChange(i, limit) {
-    const configuration = this.getConfiguration();
-    const concreteRates = configuration.concreteRates.slice();
-
-    var item = {
-      ...concreteRates[i],
-      limit
-    };
-
-    concreteRates.splice(i, 1);
-
-    var newIdx = concreteRates.length - 1;
-    while (newIdx > 0 && limit < concreteRates[newIdx - 1].limit) {
-      newIdx--;
-    }
-
-    concreteRates.splice(newIdx, 0, item);
-
-    this.setConcreteRates(concreteRates);
-  }
-
-  handleRateChange(i, rate) {
-    const configuration = this.getConfiguration();
-    const concreteRates = configuration.concreteRates.slice();
-
-    var item = {
-      ...concreteRates[i],
-      rate
-    };
-
-    concreteRates.splice(i, 1, item);
-
-    this.setConcreteRates(concreteRates);
-  }
-
-  renderRow(i) {
-    const configuration = this.getConfiguration();
-    const prevLimit = (i > 0 ? configuration.concreteRates[i - 1].limit : null);
-
-    return (
-      <ConcreteRateRow
-        key={configuration.concreteRates[i].key}
-        limit={configuration.concreteRates[i].limit}
-        rate={configuration.concreteRates[i].rate}
-        prevLimit={prevLimit}
-        onAdd={() => this.handleAddRow(i)}
-        onRemove={() => this.handleRemoveRow(i)}
-        onLimitChange={(newLimit) => this.handleLimitChange(i, newLimit)}
-        onRateChange={(newRate) => this.handleRateChange(i, newRate)}
-      />
-    );
-  }
-
-  renderConcreteRates() {
-    const configuration = this.getConfiguration();
-    const rows = configuration.concreteRates.map((value, i) => this.renderRow(i));
-
-    return (
-      <Fragment>
-        <Header as='h4'>Concrete Rates</Header>
-        <Table>
-          <Table.Header>
-            <Table.Row>
-              <Table.HeaderCell>Concrete</Table.HeaderCell>
-              <Table.HeaderCell>Rate per m<sup>2</sup></Table.HeaderCell>
-              <Table.HeaderCell>Actions</Table.HeaderCell>
-            </Table.Row>
-          </Table.Header>
-          <Table.Body>
-            {rows}
-          </Table.Body>
-        </Table>
-      </Fragment>
-    )
+  handleConcreteRateChange = (rates) => {
+    this.updateConfiguration({
+      concreteRates: rates
+    });
   }
 
   /**
@@ -382,7 +180,9 @@ export class EditConfigurationPanel extends Component {
         </Form>
         <Grid columns="2" stackable>
           <Grid.Column>
-            {this.renderConcreteRates()}
+            <Header as='h4'>Concrete Rates</Header>
+            <RatesEditor name1='Concrete' name2={<Fragment>Rate per m<sup>2</sup></Fragment>}
+              rates={configuration.concreteRates} onChange={this.handleConcreteRateChange} />
           </Grid.Column>
           <Grid.Column>
             {this.renderExtras()}
