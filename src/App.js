@@ -239,17 +239,19 @@ class App extends Component {
   }
 
   getTotal() {
+    const configuration = this.getConfiguration();
+    const tax = configuration.taxRate / 100;
+
     let items = [];
     let total = 0;
     function add(item, cost) {
+      cost = cost + cost * tax; // add tax to item
       items.push({ item: item, cost: cost });
       total += cost;
     }
 
     const area = this.getArea();
-
-    const configuration = this.getConfiguration();
-
+    
     const rate = this.getCurrentRate();
     add("Base Slab", area * rate.rate);
 
@@ -277,9 +279,6 @@ class App extends Component {
     if (rock > 0) {
       add("Rock", rock * configuration.rock);
     }
-
-    const tax = total * (configuration.taxRate / 100);
-    add("Tax", tax);
 
     return {
       items: items,
