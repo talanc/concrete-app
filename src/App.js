@@ -227,7 +227,7 @@ class App extends Component {
   }
 
   getRock() {
-    return this.state.rockForce ? this.state.rockForce : this.state.rock;
+    return this.state.rockForce ? this.state.rockForce.value : this.state.rock;
   }
 
   getArea() {
