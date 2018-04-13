@@ -433,7 +433,7 @@ class App extends Component {
     });
 
     return (
-      <Table celled>
+      <Table celled unstackable>
         <Table.Header>
           <Table.Row>
             <Table.HeaderCell>{name}</Table.HeaderCell>
@@ -452,7 +452,7 @@ class App extends Component {
 
     return (
       <Fragment>
-        <Grid columns='equal'>
+        <Grid columns='equal' stackable>
           <Grid.Column>
             <Header as='h4'>Concrete Rates</Header>
             {this.renderRatesTable('Concrete', util.m2, configuration.concreteRates, this.getCurrentRate())}
@@ -461,7 +461,7 @@ class App extends Component {
           </Grid.Column>
           <Grid.Column>
             <Header as='h4'>Extras</Header>
-            <Table celled>
+            <Table celled unstackable>
               <Table.Header>
                 <Table.Row>
                   <Table.HeaderCell>Name</Table.HeaderCell>
