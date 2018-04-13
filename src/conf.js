@@ -182,20 +182,22 @@ export class EditConfigurationPanel extends Component {
       <Fragment>
         <Header as='h4'>Configuration Name</Header>
         <Input name='name' type='text' placeholder='Configuration Name' value={configuration.name} onChange={this.handleNameChange} />
-        <Grid columns='2' stackable style={{ marginTop: '1rem' }}>
-          <Grid.Column>
-            <Header as='h4'>Concrete Rates</Header>
-            <RatesEditor name1='Concrete' name2={<Fragment>Rate per m<sup>2</sup></Fragment>}
-              rates={configuration.concreteRates} onChange={this.handleConcreteRateChange} />
-            <Header as='h4'>Rock Rates</Header>
-            <RatesEditor name1='Rock' name2={<Fragment>Rate per {util.per_m3}</Fragment>}
-              rates={configuration.rock} onChange={this.handleRockChange}
-            />
-          </Grid.Column>
-          <Grid.Column>
-            {this.renderExtras()}
-          </Grid.Column>
-        </Grid>
+        <div style={{ marginTop: '1rem', marginLeft: '-1rem', marginRight: '-1rem' }}> {/* div fixes stackable margins */}
+          <Grid columns='2' stackable>
+            <Grid.Column>
+              <Header as='h4'>Concrete Rates</Header>
+              <RatesEditor name1='Concrete' name2={<Fragment>Rate per m<sup>2</sup></Fragment>}
+                rates={configuration.concreteRates} onChange={this.handleConcreteRateChange} />
+              <Header as='h4'>Rock Rates</Header>
+              <RatesEditor name1='Rock' name2={<Fragment>Rate per {util.per_m3}</Fragment>}
+                rates={configuration.rock} onChange={this.handleRockChange}
+              />
+            </Grid.Column>
+            <Grid.Column>
+              {this.renderExtras()}
+            </Grid.Column>
+          </Grid>
+        </div>
       </Fragment>
     );
   }
