@@ -1,0 +1,6 @@
+@media only screen and (max-width: 767px) {
+  .fix-grid-margins {
+    margin-left: -1rem;
+    margin-right: -1rem;
+  }
+} 

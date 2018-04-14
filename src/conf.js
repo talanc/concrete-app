@@ -2,6 +2,7 @@ import React, { Component, Fragment } from 'react';
 import { Button, Form, Header, Input, Grid, Label, Modal, Table } from 'semantic-ui-react';
 import * as util from './util';
 import RatesEditor from './components/RatesEditor';
+import './conf.css';
 
 export function generateDisplay(rates, displayValue) {
   let old = null;
@@ -182,7 +183,7 @@ export class EditConfigurationPanel extends Component {
       <Fragment>
         <Header as='h4'>Configuration Name</Header>
         <Input name='name' type='text' placeholder='Configuration Name' value={configuration.name} onChange={this.handleNameChange} />
-        <div style={{ marginTop: '1rem', marginLeft: '-1rem', marginRight: '-1rem' }}> {/* div fixes stackable margins */}
+        <div className='fix-grid-margins' style={{ marginTop: '1rem' }}>
           <Grid columns='2' stackable>
             <Grid.Column>
               <Header as='h4'>Concrete Rates</Header>
