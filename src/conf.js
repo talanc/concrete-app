@@ -11,6 +11,10 @@ export function generateDisplay(rates, displayValue) {
     const prev = old;
     old = value;
 
+    if (rates.length === 1) {
+      return <Fragment>Any amount</Fragment>;
+    }
+
     if (prev === null) {
       return <Fragment>Less than {value.limit}{displayValue}</Fragment>;
     }
