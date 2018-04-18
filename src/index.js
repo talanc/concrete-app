@@ -6,4 +6,4 @@ import { unregister } from './registerServiceWorker';
 
 ReactDOM.render(<App />, document.getElementById('root'));
 unregister();
-console.log("concrete-app: version 3");
+console.log("concrete-app: version 4");
