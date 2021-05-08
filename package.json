@@ -19,7 +19,7 @@
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
-    "preserve": "npm run build",
+    "preserve": "set PUBLIC_URL=/&& npm run build",
     "serve": "serve -s build",
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
