@@ -1,6 +1,6 @@
 import base64url from 'base64url';
 import msgpack from 'msgpack-lite';
-import * as util from './util';
+import { machineHireOptions } from './opts';
 
 const encodeMap = {
   'isDefault': 'e',
@@ -14,6 +14,7 @@ const encodeMap = {
   'pumpOn': 'p',
   'pumpDouble': 'd',
   'polyMembraneOn': 'b',
+  'machineHireOn': 'h',
   'rock': 'o',
   'taxRate': 't'
 };
@@ -76,7 +77,7 @@ export function decodeConfiguration(encodedConfiguration) {
   const step4 = renameKeys(step3, decodeMap);
 
   // finally, migrate
-  const configuration = util.migrateConfiguration(step4);
+  const configuration = migrateConfiguration(step4);
 
   return configuration;
 }
@@ -105,7 +106,13 @@ export function getStoredAppState() {
   if (json !== null) {
     try {
       const appState = JSON.parse(json);
-      appState.configuration = util.migrateConfiguration(appState.configuration);
+      appState.configuration = migrateConfiguration(appState.configuration);
+
+      // setup machineHire
+      if (appState.machineHire === undefined)
+      {
+        appState.machineHire = machineHireOptions.optList[0].value;
+      }
       return appState;
     }
     catch (error) {
@@ -121,6 +128,37 @@ export function setStoredAppState(appState) {
     return;
   }
 
-  const json = JSON.stringify(appState);
+  // Remove rockForce from appState (pollutes state--but ultimately harmless)
+  const { rockForce, ...storedAppState } = appState;
+
+  const json = JSON.stringify(storedAppState);
   localStorage.setItem(keyAppState, json);
+}
+
+export function migrateConfiguration(configuration) {
+  // migrate rock: number to a rates system (like concreteRates)
+  if (typeof configuration.rock === 'number') {
+    console.log("migrateConfiguration: rock rates system");
+    const rock = configuration.rock;
+    configuration = {
+      ...configuration,
+      rock: [
+        {
+          key: 0,
+          limit: null,
+          rate: rock
+        }
+      ]
+    }
+  }
+
+  // Add machineHireOn
+  if (configuration.machineHireOn === undefined) {
+    configuration = {
+      ...configuration,
+      machineHireOn: 220
+    }
+  }
+
+  return configuration;
 }

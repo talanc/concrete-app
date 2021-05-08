@@ -4,6 +4,7 @@ import { generateDefaultConfiguration, generateDisplay } from './conf';
 import * as conf from './conf';
 import * as storage from './storage';
 import * as util from './util';
+import { machineHireOptions } from './opts';
 import logo from './logo.svg';
 import Footer from './Footer';
 import './App.css';
@@ -40,6 +41,7 @@ function getDefaultAppState() {
     pump: pumpOptions[0].value,
     pumpForce: null,
     polyMembrane: polyMembraneOptions[0].value,
+    machineHire: machineHireOptions.optList[0].value,
     rock: 0,
     rockForce: null,
     editConfiguration: false
@@ -159,14 +161,14 @@ class App extends Component {
       pumpForce = {
         value: pumpOption_Double.value,
         title: "Forced to Double",
-        message: <Fragment>Area > 350m<sup>2</sup></Fragment>
+        message: <Fragment>Area &gt; 350m<sup>2</sup></Fragment>
       };
     }
     else if (area > 125) {
       pumpForce = {
         value: pumpOption_On.value,
         title: "Forced to On",
-        message: <Fragment>Area > 350m<sup>2</sup></Fragment>
+        message: <Fragment>Area &gt; 350m<sup>2</sup></Fragment>
       };
     }
 
@@ -189,7 +191,7 @@ class App extends Component {
       rockForce = {
         value: rockValue,
         title: "Forced Rock",
-        message: <Fragment>Area > {util.sqm(rockArea)}</Fragment>
+        message: <Fragment>Area &gt; {util.sqm(rockArea)}</Fragment>
       };
     }
 
@@ -285,6 +287,10 @@ class App extends Component {
       add("Pump (Double)", configuration.pumpDouble);
     }
 
+    if (this.state.machineHire === machineHireOptions.optOn.value) {
+      add(machineHireOptions.label, configuration.machineHireOn)
+    }
+
     const rock = this.getRock();
     if (rock > 0) {
       add("Rock", rock * this.getRockRate().rate);
@@ -351,6 +357,7 @@ class App extends Component {
           {this.renderSelect("meshThickness", this.state.meshThickness, 'Mesh Thickness', meshThicknessOptions, this.state.meshThicknessForce)}
           {this.renderRadios("pump", this.state.pump, 'Concrete Pump', pumpOptions, this.state.pumpForce)}
           {this.renderRadios("polyMembrane", this.state.polyMembrane, 'Poly Membrane', polyMembraneOptions, null)}
+          {this.renderRadios("machineHire", this.state.machineHire, machineHireOptions.label, machineHireOptions.optList, null)}
           {this.renderField("rock", this.state.rock, <label>Rock {util.per_m3}</label>, this.state.rockForce)}
         </Form>
       </Fragment>
@@ -474,6 +481,7 @@ class App extends Component {
                 {this.renderConfigExtra("Poly Membrane", configuration.polyMembraneOn, "m2", this.state.polyMembrane === polyMembrane_On.value)}
                 {this.renderConfigExtra("Pump", configuration.pumpOn, "ea", this.getPump() === pumpOption_On.value)}
                 {this.renderConfigExtra("Pump (Double)", configuration.pumpDouble, "ea", this.getPump() === pumpOption_Double.value)}
+                {this.renderConfigExtra(machineHireOptions.label, configuration.machineHireOn, "ea", this.state.machineHire === machineHireOptions.optOn.value)}
               </Table.Body>
             </Table>
           </Grid.Column>

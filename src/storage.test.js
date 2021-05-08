@@ -17,6 +17,7 @@ const obj = {
   pumpOn: 950,
   pumpDouble: 1900,
   polyMembraneOn: 3.5,
+  machineHireOn: 123,
   rock: [
     { key: 0, limit: null, rate: 50}
   ],

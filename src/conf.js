@@ -1,5 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Form, Header, Input, Grid, Label, Modal, Table } from 'semantic-ui-react';
+import { machineHireOptions } from './opts';
 import * as util from './util';
 import RatesEditor from './components/RatesEditor';
 import './conf.css';
@@ -45,6 +46,7 @@ export function generateDefaultConfiguration() {
     pumpOn: 25,
     pumpDouble: 50,
     polyMembraneOn: 2,
+    machineHireOn: 220,
     rock: [
       { key: 0, limit: 100, rate: 10 },
       { key: 1, limit: null, rate: 5 }
@@ -171,6 +173,7 @@ export class EditConfigurationPanel extends Component {
             {this.renderExtra("slabThickness125", "Slab Thickness 125mm", "m2")}
             {this.renderExtra("meshThicknessSL82", "Mesh Thickness SL82", "m2")}
             {this.renderExtra("polyMembraneOn", "Poly Membrane", "m2")}
+            {this.renderExtra("machineHireOn", machineHireOptions.label, "ea")}
             {this.renderExtra("pumpOn", "Pump", "ea")}
             {this.renderExtra("pumpDouble", "Pump (Double)", "ea")}
             {this.renderExtra("taxRate", "Tax Rate", "pct")}
