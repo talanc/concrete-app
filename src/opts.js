@@ -5,5 +5,6 @@ export const machineHireOptions = {
     label: "Machine Hire & Cartage",
     optOff: machineHire_Off,
     optOn: machineHire_On,
-    optList: [machineHire_Off, machineHire_On]
+    optList: [machineHire_Off, machineHire_On],
+    defaultPrice: 200
 }

@@ -156,7 +156,7 @@ export function migrateConfiguration(configuration) {
   if (configuration.machineHireOn === undefined) {
     configuration = {
       ...configuration,
-      machineHireOn: 220
+      machineHireOn: machineHireOptions.defaultPrice
     }
   }
 

@@ -46,7 +46,7 @@ export function generateDefaultConfiguration() {
     pumpOn: 25,
     pumpDouble: 50,
     polyMembraneOn: 2,
-    machineHireOn: 220,
+    machineHireOn: machineHireOptions.defaultPrice,
     rock: [
       { key: 0, limit: 100, rate: 10 },
       { key: 1, limit: null, rate: 5 }
