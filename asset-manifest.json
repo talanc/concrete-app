@@ -1,8 +1,8 @@
 {
   "files": {
     "main.css": "/concrete-app/static/css/main.33a66069.chunk.css",
-    "main.js": "/concrete-app/static/js/main.b93ce5a6.chunk.js",
-    "main.js.map": "/concrete-app/static/js/main.b93ce5a6.chunk.js.map",
+    "main.js": "/concrete-app/static/js/main.18a8345e.chunk.js",
+    "main.js.map": "/concrete-app/static/js/main.18a8345e.chunk.js.map",
     "runtime-main.js": "/concrete-app/static/js/runtime-main.22a50014.js",
     "runtime-main.js.map": "/concrete-app/static/js/runtime-main.22a50014.js.map",
     "static/css/2.a5add2b8.chunk.css": "/concrete-app/static/css/2.a5add2b8.chunk.css",
@@ -20,6 +20,6 @@
     "static/css/2.a5add2b8.chunk.css",
     "static/js/2.9a12ed67.chunk.js",
     "static/css/main.33a66069.chunk.css",
-    "static/js/main.b93ce5a6.chunk.js"
+    "static/js/main.18a8345e.chunk.js"
   ]
 }
