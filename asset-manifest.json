@@ -1,25 +1,25 @@
 {
   "files": {
     "main.css": "/concrete-app/static/css/main.33a66069.chunk.css",
-    "main.js": "/concrete-app/static/js/main.18a8345e.chunk.js",
-    "main.js.map": "/concrete-app/static/js/main.18a8345e.chunk.js.map",
+    "main.js": "/concrete-app/static/js/main.495b4c82.chunk.js",
+    "main.js.map": "/concrete-app/static/js/main.495b4c82.chunk.js.map",
     "runtime-main.js": "/concrete-app/static/js/runtime-main.22a50014.js",
     "runtime-main.js.map": "/concrete-app/static/js/runtime-main.22a50014.js.map",
     "static/css/2.a5add2b8.chunk.css": "/concrete-app/static/css/2.a5add2b8.chunk.css",
-    "static/js/2.9a12ed67.chunk.js": "/concrete-app/static/js/2.9a12ed67.chunk.js",
-    "static/js/2.9a12ed67.chunk.js.map": "/concrete-app/static/js/2.9a12ed67.chunk.js.map",
+    "static/js/2.0d735bb2.chunk.js": "/concrete-app/static/js/2.0d735bb2.chunk.js",
+    "static/js/2.0d735bb2.chunk.js.map": "/concrete-app/static/js/2.0d735bb2.chunk.js.map",
     "index.html": "/concrete-app/index.html",
     "static/css/2.a5add2b8.chunk.css.map": "/concrete-app/static/css/2.a5add2b8.chunk.css.map",
     "static/css/main.33a66069.chunk.css.map": "/concrete-app/static/css/main.33a66069.chunk.css.map",
-    "static/js/2.9a12ed67.chunk.js.LICENSE.txt": "/concrete-app/static/js/2.9a12ed67.chunk.js.LICENSE.txt",
+    "static/js/2.0d735bb2.chunk.js.LICENSE.txt": "/concrete-app/static/js/2.0d735bb2.chunk.js.LICENSE.txt",
     "static/media/semantic.min.css": "/concrete-app/static/media/outline-icons.ddae9b1b.woff",
     "static/media/logo.2d27ead7.svg": "/concrete-app/static/media/logo.2d27ead7.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.22a50014.js",
     "static/css/2.a5add2b8.chunk.css",
-    "static/js/2.9a12ed67.chunk.js",
+    "static/js/2.0d735bb2.chunk.js",
     "static/css/main.33a66069.chunk.css",
-    "static/js/main.18a8345e.chunk.js"
+    "static/js/main.495b4c82.chunk.js"
   ]
 }
