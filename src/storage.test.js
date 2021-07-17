@@ -21,7 +21,8 @@ const obj = {
   rock: [
     { key: 0, limit: null, rate: 50}
   ],
-  taxRate: 10
+  taxRate: 10,
+  minPrice: 2400
 };
 
 it('obj matches obj->encode->decode', () => {

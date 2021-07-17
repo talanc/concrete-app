@@ -7,4 +7,10 @@ export const machineHireOptions = {
     optOn: machineHire_On,
     optList: [machineHire_Off, machineHire_On],
     defaultPrice: 200
-}
+};
+
+export const minPriceOptions = {
+    label: "Minimum Price",
+    labelItem: 'Minimum Price Offset',
+    defaultPrice: 2500
+};

@@ -1,6 +1,6 @@
 import base64url from 'base64url';
 import msgpack from 'msgpack-lite';
-import { machineHireOptions } from './opts';
+import { machineHireOptions, minPriceOptions } from './opts';
 
 const encodeMap = {
   'isDefault': 'e',
@@ -16,7 +16,8 @@ const encodeMap = {
   'polyMembraneOn': 'b',
   'machineHireOn': 'h',
   'rock': 'o',
-  'taxRate': 't'
+  'taxRate': 't',
+  'minPrice': 'i'
 };
 
 const decodeMap = reverseMap(encodeMap);
@@ -149,7 +150,7 @@ export function migrateConfiguration(configuration) {
           rate: rock
         }
       ]
-    }
+    };
   }
 
   // Add machineHireOn
@@ -157,7 +158,15 @@ export function migrateConfiguration(configuration) {
     configuration = {
       ...configuration,
       machineHireOn: machineHireOptions.defaultPrice
-    }
+    };
+  }
+
+  // Add minPrice
+  if (configuration.minPrice === undefined) {
+    configuration = {
+      ...configuration,
+      minPrice: minPriceOptions.defaultPrice
+    };
   }
 
   return configuration;

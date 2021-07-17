@@ -4,7 +4,7 @@ import { generateDefaultConfiguration, generateDisplay } from './conf';
 import * as conf from './conf';
 import * as storage from './storage';
 import * as util from './util';
-import { machineHireOptions } from './opts';
+import { machineHireOptions, minPriceOptions } from './opts';
 import logo from './logo.svg';
 import Footer from './Footer';
 import './App.css';
@@ -256,8 +256,10 @@ class App extends Component {
 
     let items = [];
     let total = 0;
-    function add(item, cost) {
-      cost = cost + cost * tax; // add tax to item
+    function add(item, cost, addTax = true) {
+      if (addTax) {
+        cost = cost + cost * tax;
+      }
       items.push({ item: item, cost: cost });
       total += cost;
     }
@@ -296,9 +298,18 @@ class App extends Component {
       add("Rock", rock * this.getRockRate().rate);
     }
 
+    let hasminPrice = false;
+    const minPrice = configuration.minPrice;
+    const minPriceOffset = minPrice - total;
+    if (minPriceOffset > 0) {
+      hasminPrice = true;
+      add(minPriceOptions.labelItem, minPriceOffset, false);
+    }
+
     return {
       items: items,
-      total: total
+      total: total,
+      hasminPrice
     };
   }
 
@@ -456,6 +467,7 @@ class App extends Component {
 
   renderConfigInfo() {
     const configuration = this.getConfiguration();
+    const hasminPrice = this.getTotal().hasminPrice;
 
     return (
       <Fragment>
@@ -482,6 +494,7 @@ class App extends Component {
                 {this.renderConfigExtra("Pump", configuration.pumpOn, "ea", this.getPump() === pumpOption_On.value)}
                 {this.renderConfigExtra("Pump (Double)", configuration.pumpDouble, "ea", this.getPump() === pumpOption_Double.value)}
                 {this.renderConfigExtra(machineHireOptions.label, configuration.machineHireOn, "ea", this.state.machineHire === machineHireOptions.optOn.value)}
+                {this.renderConfigExtra(minPriceOptions.label, configuration.minPrice, "ea", hasminPrice)}
               </Table.Body>
             </Table>
           </Grid.Column>

@@ -11,8 +11,9 @@ Travis CI: [![Build Status](https://travis-ci.org/talanc/concrete-app.svg?branch
 ## Commands
 
 * Debugging: `npm start` 
+* Testing: `npm run test`
 * Building: `npm run build`
-* Testing the build locally: `npm run serve`
+* Testing the local build: `npm run serve`
 * Deploying: `npm run deploy`
 
 ## TODO List

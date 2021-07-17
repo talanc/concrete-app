@@ -5,14 +5,14 @@
   "private": true,
   "dependencies": {
     "base64url": "^3.0.1",
-    "gh-pages": "^3.1.0",
+    "gh-pages": "^3.2.3",
     "msgpack-lite": "^0.1.26",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
     "react-scripts": "^4.0.3",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^2.0.3",
-    "serve": "^11.3.2"
+    "serve": "^12.0.0"
   },
   "scripts": {
     "start": "react-scripts start",

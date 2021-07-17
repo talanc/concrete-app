@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { Button, Form, Header, Input, Grid, Label, Modal, Table } from 'semantic-ui-react';
-import { machineHireOptions } from './opts';
+import { machineHireOptions, minPriceOptions } from './opts';
 import * as util from './util';
 import RatesEditor from './components/RatesEditor';
 import './conf.css';
@@ -51,7 +51,8 @@ export function generateDefaultConfiguration() {
       { key: 0, limit: 100, rate: 10 },
       { key: 1, limit: null, rate: 5 }
     ],
-    taxRate: 10
+    taxRate: 10,
+    minPrice: minPriceOptions.defaultPrice
   };
 }
 
@@ -177,6 +178,7 @@ export class EditConfigurationPanel extends Component {
             {this.renderExtra("pumpOn", "Pump", "ea")}
             {this.renderExtra("pumpDouble", "Pump (Double)", "ea")}
             {this.renderExtra("taxRate", "Tax Rate", "pct")}
+            {this.renderExtra("minPrice", minPriceOptions.label, "ea")}
           </Table.Body>
         </Table>
       </Fragment>
